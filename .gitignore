@@ -1,0 +1,9 @@
+packages/f1/
+packages/f2/
+packages/f3/
+packages/f4/
+packages/f5/
+packages/f6/
+packages/f7/
+dist/
+mcu_code*
