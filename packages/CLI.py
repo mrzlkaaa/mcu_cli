@@ -1,5 +1,5 @@
 from colorama import Fore
-from Handlers import *
+from .Handlers import *
 import fire
 
 
@@ -85,9 +85,12 @@ class CLI:
         Clear(self.on_clear, self.mpi).clear()
     
     def help(self):
-        return "List of avaliable commands:\nstatus - shows status of folders in current directory\n\
-        clear <arg1> <arg2> ... - initiate folders cleaning (remove files except burn, geom, matr)\n\
-        run <arg1> <arg2> ... - run mcu files"
+        return "List of avaliable commands:\n\
+        < status > - shows calculations status in folders of current directory\n\
+        < clear arg1 arg2 ... > - initiates folders cleaning (removes files created by software run);\n\
+        if arguments omitted will clear all folders\n\
+        < run arg1 arg2 ... > - run calculations in folders of current directory;\n\
+        if arguments omitted will run calculations in all folders\n"
        
 def initiate():
     fire.Fire(CLI)
