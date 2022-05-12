@@ -1,0 +1,12 @@
+altgraph==0.17.2
+colorama==0.4.4
+fire==0.4.0
+prompt-toolkit==1.0.14
+Pygments==2.11.2
+PyInquirer==1.0.3
+pyinstaller==4.9
+pyinstaller-hooks-contrib==2022.2
+regex==2022.3.2
+six==1.16.0
+termcolor==1.1.0
+wcwidth==0.2.5

@@ -1,0 +1,77 @@
+ 
+ MCU-KOSMOS - Developed by MCU Team - http://mcuproject.ru             
+ Date and Time  : 2022/03/18    11:48:28
+ Input Data File: burn
+ 
+  
+ ==========================
+ TG TRANSPORT MODULE OUTPUT
+ ==========================
+  
+Number of Particles per Batch    :                    1500
+Number of Batches per One Series :                      10
+Full Number of Series            :                      10
+Number of Series Skipped         :                       0
+Number of Series Used            :                      10
+Full Number of Particles Used    :                  150000
+  
+ISTR                             :                       0
+  
+ Total Task Time :      1.46 min.
+ Time per History: 0.583E-03 sec.
+ Number of Collisions per One History: 0.30688E+02
+ Run Time per One Collision: 0.190E-04 sec.
+  
+ Keff-Col(no buckling)    1.420767 (    0.002858)
+  
+ =================================
+ END OF TG TRANSPORT MODULE OUTPUT
+ =================================
+ 
+ 
+ 
+ =============================
+ -- RGS TALLY MODULE OUTPUT --
+ =============================
+ 
+ 
+ Number of Tally Materials:                        7
+ Number of Tally Zones    :                        1
+ Number of Tally Objects  :                        1
+ 
+     FINISH
+ 
+ ALL STANDARD DEVIATIONS ARE PRINTED IN PER CENT
+ 
+ BUCKLING (NEUTRONS ONLY): 0.00000E+00 0.00000E+00 9.91260E-02
+ 
+ -- NEUTRON SPECIFIC TALLIES FOR WHOLE SYSTEM --
+                     Mean       StdDev
+ Keff abs.  : 1.01260E+00  2.45497E-01
+ Keff col.  : 1.00916E+00  2.86919E-01
+ Keff t.len.: 1.01614E+00  3.64598E-01
+ Keff comb. : 1.01196E+00  2.43295E-01
+ Keff Briss.: 1.01070E+00  1.86450E-01
+ AELF, eV   : 3.05171E-01  3.24441E-02
+ 
+ 
+ ==============================
+ END OF RGS TALLY MODULE OUTPUT
+ ==============================
+ 
+  **************** NCG            *********************
+    4603255 CALL GMNEWT                          KLOOP=    11607453
+   31566346 GETTING FROM LEARN-LISTS                     0 BAD ENVELOPE EXITS
+          0 SHORT CALL GG
+          0 LONG CALL GG
+          0 REFLECTIONS FROM MATTER
+       4851 GETTING CODE-ZONES AT COMMON SEARCH
+          0 CHANGING ZONES WITH TABLE
+          0 RECONSTRUCTIONS
+          0 RESERVE
+          0 ERROR ENDS OF PATH
+          0 MIRROR REFLECTIONS
+    7001198 GOING OUT FROM CONTAINER
+    7001198 NOT REFLECTION SYMMETRY
+          0 LOOPS OF ADAPTATION
+  ***************************************************

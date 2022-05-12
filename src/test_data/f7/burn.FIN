@@ -1,0 +1,96 @@
+ 
+ MCU-KOSMOS - Developed by MCU Team - http://mcuproject.ru             
+ Date and Time  : 2022/03/18    11:46:56
+ Input Data File: burn
+ 
+  
+ ==========================
+ TG TRANSPORT MODULE OUTPUT
+ ==========================
+  
+Number of Particles per Batch    :                     500
+Number of Batches per One Series :                      10
+Full Number of Series            :                      10
+Number of Series Skipped         :                       0
+Number of Series Used            :                      10
+Full Number of Particles Used    :                   50000
+  
+ISTR                             :                       0
+  
+ Total Task Time :      0.56 min.
+ Time per History: 0.669E-03 sec.
+ Number of Collisions per One History: 0.30615E+02
+ Run Time per One Collision: 0.219E-04 sec.
+  
+ Keff-Col(no buckling)    1.400036 (    0.004841)
+  
+ =================================
+ END OF TG TRANSPORT MODULE OUTPUT
+ =================================
+ 
+ 
+ 
+ =============================
+ -- RGS TALLY MODULE OUTPUT --
+ =============================
+ 
+ 
+ Number of Tally Materials:                        7
+ Number of Tally Zones    :                        1
+ Number of Tally Objects  :                        1
+ 
+     FINISH
+ 
+ ALL STANDARD DEVIATIONS ARE PRINTED IN PER CENT
+ 
+ BUCKLING (NEUTRONS ONLY): 0.00000E+00 0.00000E+00 9.91260E-02
+ 
+ -- NEUTRON SPECIFIC TALLIES FOR WHOLE SYSTEM --
+                     Mean       StdDev
+ Keff abs.  : 9.99723E-01  3.78823E-01
+ Keff col.  : 9.94838E-01  5.05369E-01
+ Keff t.len.: 1.00063E+00  4.93677E-01
+ Keff comb. : 1.00003E+00  3.78188E-01
+ Keff Briss.: 9.95185E-01  3.98500E-01
+ AELF, eV   : 3.05427E-01  5.21331E-02
+ 
+ 
+ ==============================
+ END OF RGS TALLY MODULE OUTPUT
+ ==============================
+ 
+  
+ ==========
+ BRG OUTPUT
+ ==========
+  
+ Library path: C:\MDBKOSMOSRF\ABBNL/ABBNL
+ Number of isotopes in the library:          460
+ Keff col:   0.994837623281217       (  0.505368708104142      )
+ Results of calculation may be found in:
+ burn.SB
+ Library path: C:\MDBKOSMOSRF\ABBNL/ACTILIB
+ Number of isotopes in the library:          101
+ Calculational uncertainties may be found in:
+ burn.E
+  
+ ========================
+ END OF BRG MODULE OUTPUT
+ ========================
+  
+  **************** NCG            *********************
+    1530740 CALL GMNEWT                          KLOOP=     3864351
+   10515199 GETTING FROM LEARN-LISTS                     0 BAD ENVELOPE EXITS
+          0 SHORT CALL GG
+          0 LONG CALL GG
+          0 REFLECTIONS FROM MATTER
+       1695 GETTING CODE-ZONES AT COMMON SEARCH
+          0 CHANGING ZONES WITH TABLE
+          0 RECONSTRUCTIONS
+          0 RESERVE
+          0 ERROR ENDS OF PATH
+          0 MIRROR REFLECTIONS
+    2332611 GOING OUT FROM CONTAINER
+    2332611 NOT REFLECTION SYMMETRY
+          0 LOOPS OF ADAPTATION
+  ***************************************************
