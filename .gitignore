@@ -6,4 +6,5 @@ packages/f5/
 packages/f6/
 packages/f7/
 dist/
+src/test_data/
 mcu_code*
