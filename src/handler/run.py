@@ -12,12 +12,19 @@ class Run(Handler):
         super().__init__(files)
         self.file_name = file_name
         self.file:str
-        self.cores=cores if cores==1 else round(cores/len(self.files))
+        self.cores = cores if cores==1 else self.cores_distribution(cores)
         self.plan_histories:int = 1
         self.calculation_steps: list = [1]
         self.detected_burnup_lines:set = set()
 
-    
+    def cores_distribution(self, cores):
+        try:
+            cores:int = round(cores/len(self.files))
+        except ZeroDivisionError:
+            print("No files to run")
+        except Exception as e:
+            print(e)
+
     def read_file(self, file):
         with open(file) as f:
             con = f.readlines()

@@ -16,7 +16,7 @@ class Progress_bar(Handler):
         not_filled = int(self.LENGTH-int(self.progress*self.LENGTH))*"."
         template = f"\r|{progress_filled}{not_filled}| {self.progress*100:.1f}% | {self.current_step}/{self.steps} - ./{self.file}" #! there is a little bug for long file namespacing
         self.clear_line()
-        print(template, end="\r")
+        return print(template, end="\r")
     
     def clear_line(self):
-        print("\r"+''*self.LENGTH, end="\r")
+        return print("\r"+''*int(self.LENGTH), end="\r")
