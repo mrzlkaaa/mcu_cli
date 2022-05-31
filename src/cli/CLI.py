@@ -2,6 +2,7 @@ from . import load_options
 from colorama import Fore
 from handler.main import Handler
 from handler.run import Run
+from handler.extracter_fin import Fin
 from handler.clear import Clear
 import fire
 import os
@@ -45,6 +46,8 @@ class CLI:
             return "NO avaliable files to handle"
         return f"{self.on_clear_str}\n{self.on_run_str}"
 
+    # def line_length_formatter(self):
+
     def status_formatter(self, status):
         ok:list = []
         progress: list = []
@@ -76,6 +79,11 @@ class CLI:
         if len(key)>0:
             self.on_run = self.filter(key, self.on_run)
         Run(self.file_name, self.on_run, self.mpi).run()
+
+    def extract(self, *key):
+        if len(key)>0:
+            self.on_clear = self.filter(key, self.on_clear)
+        Fin(self.file_name, self.on_run, self.mpi).run()
 
     def clear(self, *key):
         if len(key)>0:
