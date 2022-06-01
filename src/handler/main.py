@@ -1,6 +1,8 @@
-from . import load_options
+# from . import load_options
 import os
 import re
+import xlsxwriter
+from collections import namedtuple 
 # import time
 # from colorama import Back
 
@@ -12,7 +14,7 @@ class Handler:
     def __init__(self, files=None):
         self.cwd = os.getcwd()
         self.dir= os.path.dirname(__file__)
-        self.config = load_options()
+        # self.config = load_options()
         self.files = [] if files is None else files
 
     @property
@@ -53,5 +55,38 @@ class Extracter(Handler):
             print(fnfe)
         except Exception as e:
             print(e)
-        # finally:
-        #     print("Try again")
+
+class Excel_exporter():
+    DEFAULT_CELL_SIZE = 8
+    def __init__(self, **kwargs):
+        self.wb = xlsxwriter.Workbook(kwargs.get("file_name"))
+        self._sheet = None
+        self.origin = self.positions
+
+    @property
+    def sheet(self):
+        return self._sheet
+    
+    @sheet.setter
+    def sheet(self, sheet):
+        self._sheet = self.wb.add_worksheet(sheet)
+        
+    @property
+    def positions(self):
+        Position = namedtuple("origin", ["row", "col"])
+        return Position(1, 1)
+
+    def cells_num(self, text):
+        return round(len(text)/self.DEFAULT_CELL_SIZE)
+
+    def cell_size(self, text):
+        
+        return round(len(text)/self.DEFAULT_CELL_SIZE)
+        
+
+    def write(self, block, key, value):
+        self.sheet.set_column(self.origin.col, self.origin.col
+            + self.cell_size(block)) #! not finished
+        self.sheet.write(self.origin.row, self.origin.col, block)
+        # self.wb.close()
+        
