@@ -9,11 +9,11 @@ class Fin(Extracter):
     PHOT_HEAT:str = " Photon heating, eV"
     PART_TYPE:str = "-- PARTICLE TYPE"
     FLUX:str = "FLUX."
-    REACTRATE:str = "NUCLIDE:"
+    REACTRATE:str = "REACTION:"
 
     def __init__(self, code:str, folder_path:str, extension:str, file_name:str=None):
         super().__init__(folder_path, extension, file_name)
-        self.search_keyword = self.match_code(code.upper())
+        self.search_keyword, self.split_index = self.match_code(code.upper())
         # self.last_added_dd:str
         self.data_blocks = dict()
         # self.keyword = 
@@ -22,13 +22,15 @@ class Fin(Extracter):
     def match_code(self, code:str):
         match code:
             case "KEFF":
-                return self.KEFF
+                return self.KEFF, 0
             case "FLUX":
-                return self.FLUX
+                return self.FLUX, -1
+            case "RATE":
+                return self.REACTRATE, 1
             case "NHEAT":
-                return self.NEUT_HEAT
+                return self.NEUT_HEAT, 0
             case "PHEAT":
-                return self.PHOT_HEAT
+                return self.PHOT_HEAT, 0
             case "" | None:
                 return None
 
@@ -49,7 +51,7 @@ class Fin(Extracter):
                 if self.search_keyword in c:
                     last_added_dd = list(self.data_blocks[i].keys())[len(self.data_blocks[i].keys())-1]
                     
-                    self.data_blocks[i][last_added_dd]["NAMES"].append((nn, c.split()[-1]))
+                    self.data_blocks[i][last_added_dd]["NAMES"].append((nn, c.split()[self.split_index]))
                     val = self.data_blocks[i][last_added_dd]["NAMES"][-1][0]
                     if isinstance(self.data_blocks[i][last_added_dd]["VALUES"], list):
                         self.data_blocks[i][last_added_dd]["VALUES"] = defaultdict(list)
@@ -65,7 +67,6 @@ class Fin(Extracter):
         return self.data_blocks
     
     def excel_export(self):
-        
         excel_export = Excel_exporter(file_name="test.xlsx") #todo setup the filename
         for file, file_data in self.data_blocks.items():
             shift_col:int = 0
