@@ -61,8 +61,23 @@ class Excel_exporter():
     def __init__(self, **kwargs):
         self.wb = xlsxwriter.Workbook(kwargs.get("file_name"))
         self._sheet = None
-        self.origin = self.positions
+        self._origin = self.origin
+        self.position = {"row":1,"col":1}
+        self._block_format = self.block_format
+        self._values_format = self.values_format
 
+    @property
+    def block_format(self):
+        return  self.wb.add_format({
+            "bold": True,
+            "border": 1})
+
+    @property
+    def values_format(self):
+        return self.wb.add_format({
+            "num_format":11
+        })
+                
     @property
     def sheet(self):
         return self._sheet
@@ -72,7 +87,7 @@ class Excel_exporter():
         self._sheet = self.wb.add_worksheet(sheet)
         
     @property
-    def positions(self):
+    def origin(self):
         Position = namedtuple("origin", ["row", "col"])
         return Position(1, 1)
 
@@ -80,13 +95,20 @@ class Excel_exporter():
         return round(len(text)/self.DEFAULT_CELL_SIZE)
 
     def cell_size(self, text):
+        return round(self.DEFAULT_CELL_SIZE*len(text)/self.DEFAULT_CELL_SIZE)
         
-        return round(len(text)/self.DEFAULT_CELL_SIZE)
-        
+    def write_block(self, block, shift):
+        self.position["row"], self.position["col"] = 1, 1
+        self.position["col"] += 5*shift
+        self.sheet.write(self.position["row"], self.position["col"], block)
+        self.position["row"]+=2
 
-    def write(self, block, key, value):
-        self.sheet.set_column(self.origin.col, self.origin.col
-            + self.cell_size(block)) #! not finished
-        self.sheet.write(self.origin.row, self.origin.col, block)
-        # self.wb.close()
+    def write_kval(self, key, values, shift):
+        self.sheet.write(self.position["row"], self.position["col"], "M/Z/O/E")
+        self.sheet.write(self.position["row"], self.position["col"]+1, key)
+        for r, lvalue in enumerate(values, start=1):
+            self.position["row"]+=1
+            for c, value in enumerate(lvalue, start=0):
+                self.sheet.write(self.position["row"] , self.position["col"]+c, value, self.values_format)
+        self.position["row"]+=2
         

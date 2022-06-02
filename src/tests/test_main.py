@@ -12,7 +12,7 @@ def test_check_folders():
 def extracter_obj():
     test_data:str = "test_data/fin"
     path:str = os.path.join(os.path.split(os.path.dirname(__file__))[0], test_data)
-    return Extracter(path, 'FIN', "500")
+    return Extracter(path, 'FIN')
 
 def test_find_files(extracter_obj):
     assert len(extracter_obj.files) == 0

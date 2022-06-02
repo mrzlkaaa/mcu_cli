@@ -14,8 +14,6 @@ class Fin(Extracter):
     def __init__(self, code:str, folder_path:str, extension:str, file_name:str=None):
         super().__init__(folder_path, extension, file_name)
         self.search_keyword = self.match_code(code.upper())
-        self.particle_blocks = defaultdict(list)
-        self.zone_blocks = defaultdict(list)
         # self.last_added_dd:str
         self.data_blocks = dict()
         # self.keyword = 
@@ -31,6 +29,8 @@ class Fin(Extracter):
                 return self.NEUT_HEAT
             case "PHEAT":
                 return self.PHOT_HEAT
+            case "" | None:
+                return None
 
     def particle_blocks_length(self, kys):
         return len(kys.keys())
@@ -62,21 +62,25 @@ class Fin(Extracter):
                     self.data_blocks[i][last_added_dd]["VALUES"][str(last_added_name)] \
                         .append(np.array(c.strip().split(), dtype=np.float64))
                         
-        # print(self.data_blocks)
+        return self.data_blocks
     
-    def data_formatting(self):
-        inc:int = 0
-        excel_export = Excel_exporter(file_name="test.xlsx")
+    def excel_export(self):
+        
+        excel_export = Excel_exporter(file_name="test.xlsx") #todo setup the filename
         for file, file_data in self.data_blocks.items():
+            shift_col:int = 0
+            shift_row:int = 0
             excel_export.sheet = file
             for particle_block, particle_block_data in file_data.items():
+                excel_export.write_block(particle_block, shift_col)
+                shift_col+=1
                 for particle_block_keys in particle_block_data["NAMES"]:
                     key = particle_block_keys[-1]
                     concentrated_arr = np.concatenate(particle_block_data["VALUES"][particle_block_keys[-1]])
                     row = int(concentrated_arr.size/3)
-                    value_reshaped = np.reshape(concentrated_arr, (row, 3))
-                    # print(value_reshaped)
-                    excel_export.write(particle_block, key, value_reshaped)
+                    values_reshaped = np.reshape(concentrated_arr, (row, 3))
+                    excel_export.write_kval(key, values_reshaped, shift_row)
+                    shift_row+=1
         
         excel_export.wb.close()
 
