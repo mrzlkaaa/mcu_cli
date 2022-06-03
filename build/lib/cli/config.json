@@ -1,0 +1,10 @@
+{
+    "OPTIONS": 
+    {
+        "1": "run all",
+        "2": "run specific file/files (type folder names with comma delimeter)",
+        "3": "clear all folders",
+        "4": "clear specific folders"
+    },
+    "DEFAULT_NAME_PATTERN":"burn"
+}

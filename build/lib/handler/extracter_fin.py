@@ -67,7 +67,7 @@ class Fin(Extracter):
         return self.data_blocks
     
     def excel_export(self):
-        excel_export = Excel_exporter(file_name=f"{self.folder_path.split()[-1]}.xlsx") #todo setup the filename
+        excel_export = Excel_exporter(file_name="test.xlsx") #todo setup the filename
         for file, file_data in self.data_blocks.items():
             shift_col:int = 0
             shift_row:int = 0

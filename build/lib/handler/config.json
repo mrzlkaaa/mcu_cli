@@ -1,0 +1,27 @@
+{
+    "GENERAL":{
+        "MCU_BAT":"mcu5.bat",
+        "MCUMPI_BAT":"mcu5mpi.bat"
+    },
+    "RUN":
+    {
+        "FC_CONFIG":["STEP", "DSTP"],
+        "RUN_CONFIG":
+        [
+            "NTOT",
+            "NBAT",
+            "MAXS"
+        ],
+        "HISTORIES":"Histories",
+        "CALC_STATUS":
+        { 
+            "OK":
+                [
+                    "The task is finished.",
+                    "No burnup in the task (file *.sb not found)"
+                ],
+            "ERROR":    ["job aborted"],
+            "BURNUP":   ["MCU Step: burnup"]
+        }
+    }
+}

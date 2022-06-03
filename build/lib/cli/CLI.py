@@ -68,6 +68,7 @@ class CLI:
         if len(progress) !=0:
             progress_str = self.embedding_color(" ----> Ran\n".join(progress) + " ----> Ran", "OKCYAN")
             ok = [*ok, *progress]
+            print(ok)
             ok_str = ok_str + "\n" + progress_str
         return ok, bad, ok_str, bad_str
 
@@ -80,6 +81,7 @@ class CLI:
         Run(self.file_name, self.on_run, self.mpi).run()
 
     def extract(self, *key, **params):
+        print(params)
         if len(key)>0:
             self.on_clear = self.filter(key, self.on_clear)
         for folder in  self.on_clear: #[params["path"]]:
