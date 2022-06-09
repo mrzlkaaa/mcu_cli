@@ -86,9 +86,8 @@ class CLI:
             folder_path = os.path.join(os.getcwd(), folder)
             try:
                 code, extension = params["code"], params["extension"]
-                db = Fin(code, folder_path, extension, self.file_name)
-                db.define_datablocks()
-                db.excel_export()
+                Fin(code, folder_path, extension, self.file_name)
+                # db.excel_export()
             except KeyError:
                 print("Code or extension is not given")
                 # return
