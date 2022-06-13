@@ -1,6 +1,7 @@
 # from . import load_options
 import os
 import re
+from . import load_options
 
 # import time
 # from colorama import Back
@@ -13,13 +14,14 @@ class Handler:
     def __init__(self, files=None):
         self.cwd = os.getcwd()
         self.dir= os.path.dirname(__file__)
-        # self.config = load_options()
+        self.config = load_options()
         self.files = [] if files is None else files
 
     @property
     def check_folders(self):
         d: dict = {}
-        for files in [x[0] for x in os.walk(self.cwd, topdown=False)]:
+        for files in [x[0] for x in os.walk(self.cwd)]:
+            if not files == self.cwd:
                 d[os.path.join(self.cwd, files)] = {1 if re.search(self.FIN, i) is not None \
                     else -1 if re.search(self.INI, i) is not None else 0 for i in os.listdir(os.path.join(self.cwd, files))}
         # print(d)

@@ -4,6 +4,9 @@ import fire
 from cli.CLI import CLI
 
 
+def test_run():
+    CLI(mpi=20).run()
+    assert 0
 
 def test_extract():
     test_data:str = "test_data/fin"

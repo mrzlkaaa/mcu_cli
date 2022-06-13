@@ -77,6 +77,7 @@ class CLI:
     def run(self, *key):
         if len(key)>0:
             self.on_run = self.filter(key, self.on_run)
+        print(self.on_run, self.mpi)
         Run(self.file_name, self.on_run, self.mpi).run()
 
     def extract(self, *key, **params):

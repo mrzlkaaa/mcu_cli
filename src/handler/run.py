@@ -18,8 +18,10 @@ class Run(Handler):
         self.detected_burnup_lines:set = set()
 
     def cores_distribution(self, cores):
+        print(cores)
         try:
             cores:int = round(cores/len(self.files))
+            return cores
         except ZeroDivisionError:
             print("No files to run")
         except Exception as e:
@@ -66,7 +68,7 @@ class Run(Handler):
         # print("Progress Bar is below")
         while run==True:
             try:
-                context = self.read_file(self.LOG_FILE)
+                context = self.read_file(self.LOG_FILE) #todo what if file already exists
                 run, status, msg = self.check_calc(context)
                 if len(msg) == 0:
                     printed_histories = [int(i.split()[-1]) for i in context if self.config["RUN"]["HISTORIES"] in i]
@@ -113,7 +115,15 @@ class Run(Handler):
         return
     
     def run(self):
+        
         if not len(self.files)>0:
             return print("No files to run")
         with concurrent.futures.ProcessPoolExecutor() as executor:
             resulted = [executor.submit(self.prep_path, i) for i in self.files]
+        # iterate over all submitted tasks and get results as they are available
+        for future in resulted:
+            # get the result for the next completed task
+            try:
+                result = future.result()
+            except UnicodeDecodeError:
+                print("can't display result")
