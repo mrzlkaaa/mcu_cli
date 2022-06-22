@@ -36,12 +36,21 @@ class Run(Handler):
         for k, v in self.config["RUN"]["CALC_STATUS"].items():
             for vv in v:
                 for n, i in enumerate(context):
-                    if vv in i and k != "BURNUP":
+                    if vv in i and k == "OK":
+                        return False, k, vv
+                    elif vv in i and k == "ERROR":
                         return False, k, vv
                     elif vv in i and k == "BURNUP" and not n in self.detected_burnup_lines:
                         self.detected_burnup_lines.add(n)
                         return True, k, ""
         return True, "", ""
+
+    def check_log_exists(self):
+        log_path = os.path.join(os.getcwd(), self.LOG_FILE)
+        file_exists = os.path.exists(log_path)
+        if file_exists:
+            os.remove(log_path)
+        
 
     @property            
     def input_analyzing(self):
@@ -57,15 +66,18 @@ class Run(Handler):
 
 
     async def async_loop(self):
+        self.check_log_exists()
         proc = await asyncio.create_subprocess_shell(
             self.cmd,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE)
 
         run:bool = True
+        share:int = 0
         last_printed_histories:int
         current_step:int = 1
-        # print("Progress Bar is below")
+        success:bool = True
+        bar = Progress_bar(share, current_step, len(self.calculation_steps), self.file)
         while run==True:
             try:
                 context = self.read_file(self.LOG_FILE) #todo what if file already exists
@@ -76,14 +88,22 @@ class Run(Handler):
                     share = int(last_printed_histories/self.plan_histories*100)
                     if status == "BURNUP":
                         current_step+=1
-                    Progress_bar(share, current_step, len(self.calculation_steps), self.file).print_res()
+                        bar.current_step = current_step
+                    bar.progress = share
+                    bar.print_res()
+                    # Progress_bar(share, current_step, len(self.calculation_steps), self.file).print_res() #! create instance only once and only update variable
                     time.sleep(5)
-                else:
-                    success:bool = False
-                    if status == "OK":
-                        success = True
-                    Progress_bar(100, current_step, len(self.calculation_steps), self.file, success).print_res()
-                    print(f"\n{msg}")
+                    continue
+                # else:
+                    # success:bool = False
+                if status == "ERROR":
+                    success = not success
+                    bar.success = success
+                bar.progress = 100
+                bar.print_res()
+                print(f"\n{msg}")
+                    # Progress_bar(100, current_step, len(self.calculation_steps), self.file, success).print_res()
+                
             except FileNotFoundError:
                 print("\rAwaiting for running code...", end="\r")
                 time.sleep(0.5)

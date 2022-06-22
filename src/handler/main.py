@@ -48,8 +48,6 @@ class Extracter(Handler):
 
     def read_file(self, itr):
         try:
-            # for i in self.file:
-                # print(i)
             with open(os.path.join(self.folder_path, itr), "r", errors='ignore') as f:
                 for row in f:
                     yield row
