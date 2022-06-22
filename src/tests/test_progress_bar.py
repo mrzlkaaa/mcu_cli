@@ -12,21 +12,20 @@ from handler.progress_bar import Progress_bar
 #         self.file = file
 #         self.color=Back.CYAN if success else Back.RED
 
-# @pytest.fixture
+
 # def random_status():
-
-
 @pytest.fixture
-def prep_bars():
-    bars_list:list = []
-    for i in range(10):
-        bars_list.append(Progress_bar(50+i*2, 1,1, "my_file", True).print_res)
-    return bars_list
+def bar_instance():
+    bar = Progress_bar(0, 1,1, "my_file", True)
+    return bar
 
-def test_bars(prep_bars):
-    for i in prep_bars:
-        i()
-        # assert 0
+
+@pytest.mark.parametrize("i", range(10))
+def test_bar(i, bar_instance):
+    print(bar_instance.progress)
+    bar_instance.progress =  i*2
+    bar_instance.print_res()
+    assert 0
     
 
 
