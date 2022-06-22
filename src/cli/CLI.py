@@ -6,6 +6,7 @@ from handler.extracter_fin import Fin
 from handler.clear import Clear
 import fire
 import os
+import re
 
 
 class CLI:
@@ -71,12 +72,9 @@ class CLI:
             ok_str = ok_str + "\n" + progress_str
         return ok, bad, ok_str, bad_str
 
-    def filter(self, key, files):
-        return [i for i in files for j in key if i==j]
-
     def run(self, *key):
         if len(key)>0:
-            self.on_run = self.filter(key, self.on_run)
+            self.on_run = list({i for i in self.on_run for j in key if i==re.search(r"[^\\.].+[^\\]", j).group()})
         print(self.on_run, self.mpi)
         Run(self.file_name, self.on_run, self.mpi).run()
 
