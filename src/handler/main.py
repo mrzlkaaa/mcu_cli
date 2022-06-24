@@ -23,7 +23,7 @@ class Handler:
         for files in [x[0] for x in os.walk(self.cwd)]:
             if not files == self.cwd:
                 d[os.path.join(self.cwd, files)] = {1 if re.search(self.FIN, i) is not None \
-                    else -1 if re.search(self.INI, i) is not None else 0 for i in os.listdir(os.path.join(self.cwd, files))}
+                    else 0 if re.search(self.INI, i) is not None else -1 for i in os.listdir(os.path.join(self.cwd, files))}
         # print(d)
         return d
 
