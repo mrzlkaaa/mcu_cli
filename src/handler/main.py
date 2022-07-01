@@ -31,10 +31,19 @@ class Extracter(Handler):
     
     def __init__(self, folder_path:str, extension:str, file_name:str=None):
         super().__init__()
-        self.folder_path:str = folder_path
-        self.extension:str = fr".{extension}\Z"
+        self._folder_path:str = folder_path
+        self.extension:str = fr".{extension}_?" #! turns out to error for any folder with burnup 
         self.files:list = self.find_files
         self.file:list = self.match_file(file_name) if file_name is not None else self.files
+
+    @property
+    def folder_path(self):
+        return self._folder_path
+
+    @folder_path.setter
+    def folder_path(self, folder_path):
+        self._folder_path = folder_path
+
 
     @property
     def find_files(self): #* looping in folder_path and collecting files with .<<extension>>

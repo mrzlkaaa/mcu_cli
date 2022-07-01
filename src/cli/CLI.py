@@ -1,5 +1,6 @@
 from . import load_options
 from colorama import Fore
+from tabulate import tabulate
 from handler.main import Handler
 from handler.run import Run
 from handler.extracter_fin import Fin
@@ -7,7 +8,8 @@ from handler.clear import Clear
 import fire
 import os
 import re
-from tabulate import tabulate
+import asyncio
+
 
 
 class Prettier():
@@ -60,6 +62,7 @@ class CLI:
         return table, ok, progress, bad
 
     def key_filter(self, key, folders):
+        print(key)
         try:
             return list({i for i in folders for j in key if i==re.search(r"[^\\.].*[^\\]", j).group()})
         except AttributeError:
@@ -69,8 +72,8 @@ class CLI:
     def status(self):
         headers = ["Folder", "Status"]
         return print(tabulate(self.status_table, 
-            headers = map(lambda x: self.prettier.colorize(x, "HEADER"), headers),
-            tablefmt="pretty"))
+                        headers = map(lambda x: self.prettier.colorize(x, "HEADER"), headers),
+                        tablefmt="pretty"))
 
     def run(self, *key):
         if len(key)>0:
@@ -78,27 +81,28 @@ class CLI:
         Run(self.file_name, self.on_run, self.mpi).run()
 
     def restart_run(self, *key):
-        self.on_run = self.on_progress
+        self.on_run = [*self.on_progress, *self.on_clear]
         if len(key)>0:
             self.on_run = self.key_filter(key, self.on_run)
         self.run()
 
-    def extract(self, *key, **params):
+    async def extract(self, *key, **params):
+        print(self.on_clear)
+        code, extension = params["code"], params["extension"]
         if len(key)>0:
             self.on_clear = self.key_filter(key, self.on_clear)
-        for folder in  self.on_clear: 
+        background_tasks = set()
+        for folder in  self.on_clear: #* loop over folder and all .FIN files
             folder_path = os.path.join(os.getcwd(), folder)
-            try:
-                code, extension = params["code"], params["extension"]
-                Fin(code, folder_path, extension, self.file_name)
-                # db.excel_export()
-            except KeyError:
-                print("Code or extension is not given")
-                # return
+            fin = Fin(code, folder_path, extension, self.file_name) #* FIN instance for each iterable folder
+            task = asyncio.create_task(fin.extract_method())
+            background_tasks.add(task)
+        res = await asyncio.gather(*background_tasks)
+        print(res)
         
     def clear(self, *key):
         if len(key)>0:
-            self.on_clear = self.key_filter(key, self.on_clear)
+            self.on_clear = self.key_filter(*key, self.on_clear)
         Clear(self.file_name, self.on_clear, self.mpi).clear()
     
     def help(self):
