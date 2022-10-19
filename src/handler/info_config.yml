@@ -1,0 +1,24 @@
+mcu:
+  status:
+    inprogress:
+      file: .ini
+    finished:
+      file:
+        - .txt
+        - .FIN
+      key_word: The task is finished.
+  tocopy:
+    files:
+      - .FIN
+      - .PDC
+      - .txt
+      - .REZ
+      - .DRZ
+
+phits:
+  status:
+    inprogress:
+      file: phits.out
+    finished:
+      file: phits.out
+      key_word: total cpu time

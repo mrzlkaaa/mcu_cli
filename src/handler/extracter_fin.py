@@ -3,6 +3,7 @@ from .main import Extracter
 from .excel_exporter import Excel_exporter
 from  collections import defaultdict
 import numpy as np
+import asyncio
 
 
 class Fin(Extracter):
@@ -20,7 +21,7 @@ class Fin(Extracter):
              self.split_index = self.match_code()
         # self.last_added_dd:str
         self.data_blocks = dict()
-        self.extract_method()
+        # self.extract_method()
         # self.keyword = 
         return
 
@@ -42,20 +43,22 @@ class Fin(Extracter):
     @property
     def excel_writer(self):
         return Excel_exporter(file_name=f"{self.folder_path.split()[-1]}_{self.code}.xlsx")
-    # def extract(self):
-    #     self.extract_method()
 
+    # def start(self):
+    #     return self.extract_method()
 
     def get_last_added_db(self, i):
-        print(self.data_blocks[i].keys())
+        
         return list(self.data_blocks[i].keys())[len(self.data_blocks[i].keys())-1]
 
-    def keff_data(self):
+    async def keff_data(self):
+        
+        print(f"do {self.folder_path}")
         for _, i in enumerate(self.file):
             self.data_blocks[i] = defaultdict(list)
             self.data_blocks[i][f"{i}"] = defaultdict(list)
             for nn, c in enumerate(self.read_file(i), start=1):
-                if self.search_keyword in c:
+                if self.search_keyword in c and not "(" in c:
                     last_added_db = self.get_last_added_db(i)
                     splitted = c.split()
                     # print(nn, splitted[-2:])
@@ -65,17 +68,17 @@ class Fin(Extracter):
                         self.data_blocks[i][last_added_db]["VALUES"] = defaultdict(list)
                     self.data_blocks[i][last_added_db]["VALUES"][f"{splitted[0]} {splitted[1]}"] \
                         .append(np.array(splitted[-2:], dtype=np.float64))
-        return self.data_blocks
+        return self.keff_excel_export()
+        # return self.data_blocks
 
     # def print_keff_data(self):
-
 
 
     def heat_data_blocks(self):
         return
 
-    #! applied for fluxes and reac_rates
-    def fr_datablocks(self): #TODO use threadPool to loop over files
+    #* applied for fluxes and reac_rates
+    async def fr_datablocks(self):
         last_added_db: str = ''
         val:int = 0
         switcher:bool = False
@@ -131,7 +134,7 @@ class Fin(Extracter):
     def keff_excel_export(self):
         excel_export = self.excel_writer
         excel_export.sheet = "Keff"
-        print(self.data_blocks.keys())
+        
         shift_col:int = 0
         for file, file_data in self.data_blocks.items():
             excel_export.write_block(file, shift_col)
