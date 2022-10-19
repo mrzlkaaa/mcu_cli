@@ -2,13 +2,16 @@ from . import load_options
 from colorama import Fore
 from tabulate import tabulate
 from handler.main import Handler
+from handler.info import MCU
 from handler.run import Run
 from handler.extracter_fin import Fin
 from handler.clear import Clear
+from handler.copy import Copy
 import fire
 import os
 import re
 import asyncio
+import inspect
 
 
 
@@ -23,76 +26,78 @@ class Prettier():
     }
     # def __init__(self):
 
-    def colorize(self, string, type):
-        return f"{self.bcolors[type]}{string}{self.bcolors['RESET']}"
+    def colorize(self, string, type, rnge=None):
+        if rnge is None:
+            return f"{self.bcolors[type]}{string}{self.bcolors['RESET']}"
+        formatted_iterable: list = []
+        for _ in range(len(rnge)):
+            formatted_iterable.append(f"{self.bcolors[type]}{string}{self.bcolors['RESET']}")
+        return formatted_iterable
+
 
 class CLI:
+    STATUS_HEADER:list = ["Folder", "Status"]
+    
     def __init__(self, filename=None, mpi=None): #todo move args to func?
         self.options = load_options()
         self.prettier = Prettier()
         self.file_name = self.options["DEFAULT_NAME_PATTERN"] if filename is None else filename
-        self.status_table, self.on_clear, \
-            self.on_progress, self.on_run = self.status_formatter(Handler().check_folders) #todo refactor to dict?
         self.mpi = 1 if mpi is None else mpi
+        # self.mcu_info = self.get_status_info()
+        self.mcu_info = MCU()
+        
     
     def __repr__(self):
         return "use < mcu help > to see avaliable commands >"
 
-    #* creates 2d array that fills by array [folder, status] 
-    def status_formatter(self, checked_folders):
-        table:list = []
-        ok:list = []
-        progress: list = []
-        bad: list = []
-        for k,v in checked_folders.items():
-            folder:str = os.path.split(k)[-1]
-            if len(v)==3:
-                finished:list = [folder, self.prettier.colorize("Finished", "OKGREEN") ]
-                table.append(finished)
-                ok.append(folder)
-            elif len(v)==2:
-                inprogress:list = [folder, self.prettier.colorize("InProgress", "OKCYAN")]
-                table.append(inprogress)
-                progress.append(folder)
-            else:
-                torun:list = [folder, self.prettier.colorize("ToRun", "FAIL")]
-                table.append(torun)
-                bad.append(folder)
-        
-        return table, ok, progress, bad
-
     def key_filter(self, key, folders):
-        print(key)
         try:
             return list({i for i in folders for j in key if i==re.search(r"[^\\.].*[^\\]", j).group()})
         except AttributeError:
             print("Folder with a given name is not found")
 
-    @property
-    def status(self):
-        headers = ["Folder", "Status"]
-        return print(tabulate(self.status_table, 
-                        headers = map(lambda x: self.prettier.colorize(x, "HEADER"), headers),
-                        tablefmt="pretty"))
+    async def get_status_info(self):
+        await self.mcu_info.calc_status()
+        print("folders checked")
+        
+    
+    async def status(self):
+        await self.get_status_info()
+        folder, status = list(map(lambda x: self.prettier.colorize(x, "HEADER"), self.STATUS_HEADER))
+        return print(tabulate({
+                            folder:[
+                                *self.mcu_info.onrun, *self.mcu_info.inprogress, *self.mcu_info.finished
+                            ],
+                            status:[
+                                *self.prettier.colorize("ONRUN", "FAIL", self.mcu_info.onrun),
+                                *self.prettier.colorize("INPROGRESS", "OKCYAN", self.mcu_info.inprogress),
+                                *self.prettier.colorize("FINISHED", "OKGREEN", self.mcu_info.finished)
+                            ]},
+                            headers = "keys",
+                            tablefmt="pretty"))
 
-    def run(self, *key):
+    async def run(self, *key):
+        await self.get_status_info()
+        onrun:list = self.mcu_info.onrun
         if len(key)>0:
-            self.on_run = self.key_filter(key, self.on_run)
-        Run(self.file_name, self.on_run, self.mpi).run()
+            onrun = self.key_filter(key, self.mcu_info.onrun)
+        Run(self.file_name, onrun, self.mpi).run()
 
-    def restart_run(self, *key):
-        self.on_run = [*self.on_progress, *self.on_clear]
+    async def restart(self, *key):
+        await self.get_status_info()
+        onrun = [*self.mcu_info.inprogress, *self.mcu_info.finished]
         if len(key)>0:
-            self.on_run = self.key_filter(key, self.on_run)
-        self.run()
+            onrun = self.key_filter(key, onrun)
+        Run(self.file_name, onrun, self.mpi).run()
 
     async def extract(self, *key, **params):
-        print(self.on_clear)
+        await self.get_status_info()
+        onclear:list = self.mcu_info.finished
         code, extension = params["code"], params["extension"]
         if len(key)>0:
-            self.on_clear = self.key_filter(key, self.on_clear)
+            onclear = self.key_filter(key, self.mcu_info.finished)
         background_tasks = set()
-        for folder in  self.on_clear: #* loop over folder and all .FIN files
+        for folder in  onclear: #* loop over folder and all .FIN files
             folder_path = os.path.join(os.getcwd(), folder)
             fin = Fin(code, folder_path, extension, self.file_name) #* FIN instance for each iterable folder
             task = asyncio.create_task(fin.extract_method())
@@ -100,11 +105,24 @@ class CLI:
         res = await asyncio.gather(*background_tasks)
         print(res)
         
-    def clear(self, *key):
-        if len(key)>0:
-            self.on_clear = self.key_filter(*key, self.on_clear)
-        Clear(self.file_name, self.on_clear, self.mpi).clear()
+    async def clear(self, *key):
+        await self.get_status_info()
+        if not len(key)>0:
+            raise TypeError("No keys to clear given")
+        onclear = self.key_filter(key, self.mcu_info.finished)
+        Clear(self.file_name, onclear, self.mpi).clear()
     
+    async def copy(self, *key):
+        await self.get_status_info()
+        oncopy:list = self.mcu_info.dir_list
+        if len(key)>0:
+            oncopy = self.key_filter(key, self.mcu_info.dir_list)
+        folders_path = Copy.folders_to_paths(oncopy)
+        Copy(folders_path, self.mcu_info.options["mcu"]["tocopy"]["files"]).copy()
+        
+
+        return
+
     def help(self):
         return "List of avaliable commands:\n\
         < status > - shows calculations status in folders of current directory\n\
@@ -115,7 +133,7 @@ class CLI:
 
 
 def initiate():
-    fire.Fire(CLI)
+    asyncio.run(fire.Fire(CLI))
 
 if __name__ == "__main__":
     initiate()
