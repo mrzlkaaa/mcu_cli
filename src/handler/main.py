@@ -27,11 +27,11 @@ class Handler:
         # print(d)
         return d
 
-class Extracter(Handler):
+class Extracter(Handler): #todo must take file, dirs from Info interface!
     
-    def __init__(self, folder_path:str, extension:str, file_name:str=None):
+    def __init__(self, folder_name:str, extension:str, file_name:str=None):
         super().__init__()
-        self._folder_path:str = folder_path
+        self._folder_path:str = folder_name #! it's folde name actually
         self.extension:str = fr".{extension}_?" #! turns out to error for any folder with burnup 
         self.files:list = self.find_files
         self.file:list = self.match_file(file_name) if file_name is not None else self.files
@@ -41,9 +41,8 @@ class Extracter(Handler):
         return self._folder_path
 
     @folder_path.setter
-    def folder_path(self, folder_path):
-        self._folder_path = folder_path
-
+    def folder_path(self, folder_name):
+        self._folder_path = folder_name
 
     @property
     def find_files(self): #* looping in folder_path and collecting files with .<<extension>>
