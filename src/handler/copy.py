@@ -20,6 +20,12 @@ class Copy():
     def single_extension(cls, paths, extension):
         return cls(paths, [extension])
 
+    def input_files_regex(self, string, *patterns):
+        for pattern in patterns:
+            res = re.search(pattern, string)
+            if res:
+                return True
+        return False
 
     def extension_regex(self, extension, string):
         pattern = re.compile(fr"{extension}\Z|{extension}_B\d+")
@@ -31,7 +37,8 @@ class Copy():
     def filter_files(self, path):
         filtered_files:list = []
         for i in os.listdir(path):
-            if re.search(r"\d+\.\d+", i) or "." not in i:
+            if self.input_files_regex(i, r"\d+\.\d+\.\d+_\w+$", r"\d+_\w+$") or not "." in i:  #* patterns to match XX.XX.XX_TEXT and XX_TEXT
+                print(i)
                 filtered_files.append(i)
             for j in self.extensions:
                 if self.extension_regex(j, i):
@@ -62,7 +69,7 @@ class Copy():
         tocopy:dict = self.populate_dict() #todo async call and await till finished
         for k,v in tocopy.items():
             folder = os.path.split(k)[-1]
-            dst_folder = os.path.join(copies_dst, folder)
+            dst_folder = os.path.join(copies_dst, "!" + folder)
             self.create_folder(dst_folder)
             for file in v:
                 source = os.path.join(k,file)

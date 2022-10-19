@@ -7,6 +7,7 @@ from handler.run import Run
 from handler.extracter_fin import Fin
 from handler.clear import Clear
 from handler.copy import Copy
+import __main__
 import fire
 import os
 import re
@@ -47,8 +48,8 @@ class CLI:
         self.mcu_info = MCU()
         
     
-    def __repr__(self):
-        return "use < mcu help > to see avaliable commands >"
+    # def __repr__(self):
+    #     return "use < mcu help > to see avaliable commands >"
 
     def key_filter(self, key, folders):
         try:
@@ -123,7 +124,7 @@ class CLI:
 
         return
 
-    def help(self):
+    async def help(self):
         return "List of avaliable commands:\n\
         < status > - shows calculations status in folders of current directory\n\
         < clear arg1 arg2 ... > - initiates folders cleaning (removes files created by software run);\n\
@@ -133,10 +134,14 @@ class CLI:
 
 
 def initiate():
-    asyncio.run(fire.Fire(CLI))
+    # t = asyncio.create_task(fire.Fire(CLI))
+    # print(fire.Fire(CLI))
+    fire.Fire(CLI)
+    # await t
 
-if __name__ == "__main__":
-    initiate()
+# if __name__ == "__main__":
+#     print("CALLED")
+#     initiate()
 
 
     
