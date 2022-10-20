@@ -16,7 +16,7 @@ class Fin(Extracter):
 
     def __init__(self, code:str, folder_path:str, extension:str, file_name:str=None):
         super().__init__(folder_path, extension, file_name)
-        self.code = code.upper()
+        self.code = code.upper()  #* what exactly to extract (flux, rates and so on)
         self.search_keyword, self.extract_method, \
              self.split_index = self.match_code()
         # self.last_added_dd:str
@@ -69,9 +69,6 @@ class Fin(Extracter):
                     self.data_blocks[i][last_added_db]["VALUES"][f"{splitted[0]} {splitted[1]}"] \
                         .append(np.array(splitted[-2:], dtype=np.float64))
         return self.keff_excel_export()
-        # return self.data_blocks
-
-    # def print_keff_data(self):
 
 
     def heat_data_blocks(self):

@@ -27,13 +27,13 @@ class Handler:
         # print(d)
         return d
 
-class Extracter(Handler): #todo must take file, dirs from Info interface!
+class Extracter(Handler): #todo must takes file, dirs from Info interface!
     
-    def __init__(self, folder_name:str, extension:str, file_name:str=None):
+    def __init__(self, folder_path:str, extension:str, file_name:str=None):
         super().__init__()
-        self._folder_path:str = folder_name #! it's folde name actually
+        self._folder_path:str = folder_path
         self.extension:str = fr".{extension}_?" #! turns out to error for any folder with burnup 
-        self.files:list = self.find_files
+        self.files:list = self.filter_files()
         self.file:list = self.match_file(file_name) if file_name is not None else self.files
 
     @property
@@ -41,15 +41,14 @@ class Extracter(Handler): #todo must take file, dirs from Info interface!
         return self._folder_path
 
     @folder_path.setter
-    def folder_path(self, folder_name):
-        self._folder_path = folder_name
+    def folder_path(self, folder_path):
+        self._folder_name = folder_path
 
-    @property
-    def find_files(self): #* looping in folder_path and collecting files with .<<extension>>
+    def filter_files(self): #* looping in folder_path and collecting files with .<<extension>>
         return [i for i in os.listdir(self.folder_path) if re.search(self.extension, i)]
 
     def match_file(self, file_name):
-        file: list = [i for i in self.find_files if file_name in i]
+        file: list = [i for i in self.filter_files if file_name in i]
         if not len(file) > 0:
             raise FileNotFoundError("File with a given name is not found")
         return file

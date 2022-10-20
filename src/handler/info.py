@@ -11,17 +11,30 @@ class Info:
         self.options: dict = info_load_options()
         self.cwd: str = os.getcwd()
         self.files_list: list = os.listdir() 
-        self.dir_list: list = self.get_dir_list()
-        self.paths_todirs: list = self.make_todirs_path
+        self._dir_list: list = self.get_dir_list()
+        self._paths_todirs: list = self.make_todirs_path()
         self.onrun:set = set()
         self.inprogress:set = set()
         self.finished:set = set()
         
-    
+    # #* as a test
+    @property
+    def dir_list(self):
+        return self._dir_list
+
+    #* as a test
+    @dir_list.setter
+    def dir_list(self, dirs):
+        self._dir_list = dirs
+        self._paths_todirs = self.make_todirs_path()
+
+    @property
+    def paths_todirs(self):
+        return self._paths_todirs
+
     def get_dir_list(self):
         return [i for i in self.files_list if os.path.isdir(os.path.join(self.cwd, i))]
 
-    @property
     def make_todirs_path(self):
         return [os.path.join(self.cwd, i) for i in self.dir_list]
     
