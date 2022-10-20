@@ -42,7 +42,7 @@ async def test_rerun():
     assert 0
 
 def test_copy():
-    asyncio.run(CLI().copy())
+    asyncio.run(CLI().copy("f1"))
     # await CLI().status()
     assert 0
 

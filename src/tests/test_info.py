@@ -28,3 +28,9 @@ def test_mcu_folder_check(test_mcu_info):
     print(test_mcu_info.inprogress)
     print(test_mcu_info.finished)
     assert 0
+
+def test_dir_list_property(test_info):
+    test_info.dir_list = ["f1", "log"]
+    print(test_info.dir_list)
+    print(test_info.paths_todirs)
+    assert 0
