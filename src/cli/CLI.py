@@ -7,6 +7,7 @@ from handler.run import Run
 from handler.extracter_fin import Fin
 from handler.clear import Clear
 from handler.copy import Copy
+from handler.filter import Filter
 import __main__
 import fire
 import os
@@ -91,7 +92,7 @@ class CLI:
             onrun = self.key_filter(key, onrun)
         Run(self.file_name, onrun, self.mpi).run()
 
-    async def extract(self, *key, **params):
+    async def extract_fin(self, *key, **params):
         await self.get_status_info()
         onclear:list = self.mcu_info.finished
         code, extension = params["code"], params["extension"]
@@ -106,6 +107,9 @@ class CLI:
         res = await asyncio.gather(*background_tasks)
         print(res)
         
+    def extract_rez(self):
+        return
+
     async def clear(self, *key):
         await self.get_status_info()
         if not len(key)>0:
@@ -117,10 +121,17 @@ class CLI:
         await self.get_status_info()
         oncopy:list = self.mcu_info.dir_list
         if len(key)>0:
-            oncopy = self.key_filter(key, self.mcu_info.dir_list)
-        folders_path = Copy.folders_to_paths(oncopy)
-        Copy(folders_path, self.mcu_info.options["mcu"]["tocopy"]["files"]).copy()
-        
+            oncopy = self.key_filter(key, oncopy)
+
+        self.mcu_info.dir_list = oncopy
+
+        patterns = [
+            *[fr"{extension}\Z|{extension}_B\d+" for extension in self.mcu_info.options["mcu"]["tocopy"]["files"]],
+            *self.mcu_info.options["mcu"]["filter"]["regex"]
+        ]
+        filtered = Filter(self.mcu_info.paths_todirs, "byregex", *patterns).filter()
+        print(filtered)
+        Copy(filtered).copy_as_defaultdict()
 
         return
 

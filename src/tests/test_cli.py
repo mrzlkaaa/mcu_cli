@@ -22,10 +22,7 @@ def test_status():
 
 def test_extract():
     path = PATH(test_data_keff_fin)
-    # path:str = os.path.join(os.path.split(os.path.dirname(__file__))[0], test_data)
-
     asyncio.run(CLI().extract(code="keff", extension=".FIN"))
-    # print(cli.on_clear)
     assert 0
 
 @pytest.mark.asyncio
@@ -42,7 +39,7 @@ async def test_rerun():
     assert 0
 
 def test_copy():
-    asyncio.run(CLI().copy())
+    asyncio.run(CLI().copy("f1"))
     # await CLI().status()
     assert 0
 
