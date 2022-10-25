@@ -83,32 +83,34 @@ class CLI:
         onrun:list = self.mcu_info.onrun
         if len(key)>0:
             onrun = self.key_filter(key, self.mcu_info.onrun)
-        Run(self.file_name, onrun, self.mpi).run()
+        onrun_paths = [self.mcu_info.make_todir_path(i) for i in onrun]
+        print(self.file_name)
+        Run(self.file_name, onrun_paths, self.mpi).run()
 
     async def restart(self, *key):
         await self.get_status_info()
         onrun = [*self.mcu_info.inprogress, *self.mcu_info.finished]
         if len(key)>0:
             onrun = self.key_filter(key, onrun)
-        Run(self.file_name, onrun, self.mpi).run()
+        onrun_paths = [self.mcu_info.make_todir_path(i) for i in onrun]
+        
+        Run(self.file_name, onrun_paths, self.mpi).run()
+
 
     async def extract_fin(self, *key, **params):
+        code = params["code"]
         await self.get_status_info()
         onclear:list = self.mcu_info.finished
-        code, extension = params["code"], params["extension"]
         if len(key)>0:
-            onclear = self.key_filter(key, self.mcu_info.finished)
-        background_tasks = set()
-        for folder in  onclear: #* loop over folder and all .FIN files
-            folder_path = os.path.join(os.getcwd(), folder)
-            fin = Fin(code, folder_path, extension, self.file_name) #* FIN instance for each iterable folder
-            task = asyncio.create_task(fin.extract_method())
-            background_tasks.add(task)
-        res = await asyncio.gather(*background_tasks)
-        print(res)
+            onclear = self.key_filter(key, onclear)
+        onclear_paths = [self.mcu_info.make_todir_path(i) for i in onclear]
+        filtered = Filter(onclear_paths, "byregex", 'FIN\\Z|FIN_B\\d+').filter()
+        print(filtered)
+        await Fin(filtered, code).run()
         
-    def extract_rez(self):
-        return
+    async def extract_rez(self):  #todo method under development
+        await self.get_status_info()
+        return "method under development"
 
     async def clear(self, *key):
         await self.get_status_info()
@@ -123,13 +125,13 @@ class CLI:
         if len(key)>0:
             oncopy = self.key_filter(key, oncopy)
 
-        self.mcu_info.dir_list = oncopy
+        oncopy_paths = [self.mcu_info.make_todir_path(i) for i in oncopy]
 
         patterns = [
             *[fr"{extension}\Z|{extension}_B\d+" for extension in self.mcu_info.options["mcu"]["tocopy"]["files"]],
             *self.mcu_info.options["mcu"]["filter"]["regex"]
         ]
-        filtered = Filter(self.mcu_info.paths_todirs, "byregex", *patterns).filter()
+        filtered = Filter(oncopy_paths, "byregex", *patterns).filter()
         print(filtered)
         Copy(filtered).copy_as_defaultdict()
 
