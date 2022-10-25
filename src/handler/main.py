@@ -11,11 +11,11 @@ class Handler:
     FIN = r"\.FIN"
     LOG_FILE:str
 
-    def __init__(self, files=None):
-        self.cwd = os.getcwd()
-        self.dir= os.path.dirname(__file__)
+    def __init__(self, towork_with_files):
+        self.cwd = os.getcwd() #?
+        self.dir= os.path.dirname(__file__) #?
         self.config = load_options()
-        self.files = [] if files is None else files
+        self.towork_with_files = towork_with_files #* files are given in defaultdict with paths
 
     @property
     def check_folders(self):
@@ -29,33 +29,14 @@ class Handler:
 
 class Extracter(Handler): #todo must takes file, dirs from Info interface!
     
-    def __init__(self, folder_path:str, extension:str, file_name:str=None):
-        super().__init__()
-        self._folder_path:str = folder_path
-        self.extension:str = fr".{extension}_?" #! turns out to error for any folder with burnup 
-        self.files:list = self.filter_files()
-        self.file:list = self.match_file(file_name) if file_name is not None else self.files
+    def __init__(self, towork_with_files:str, code:str):
+        super().__init__(towork_with_files)
+        self.code = code.upper()  #* what exactly to extract (flux, rates and so on)
 
-    @property
-    def folder_path(self):
-        return self._folder_path
 
-    @folder_path.setter
-    def folder_path(self, folder_path):
-        self._folder_name = folder_path
-
-    def filter_files(self): #* looping in folder_path and collecting files with .<<extension>>
-        return [i for i in os.listdir(self.folder_path) if re.search(self.extension, i)]
-
-    def match_file(self, file_name):
-        file: list = [i for i in self.filter_files if file_name in i]
-        if not len(file) > 0:
-            raise FileNotFoundError("File with a given name is not found")
-        return file
-
-    def read_file(self, itr):
+    def read_file(self, parent_path, file):
         try:
-            with open(os.path.join(self.folder_path, itr), "r", errors='ignore') as f:
+            with open(os.path.join(parent_path, file), "r", errors='ignore') as f:
                 for row in f:
                     yield row
         except FileNotFoundError as fnfe:

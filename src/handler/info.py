@@ -35,6 +35,10 @@ class Info:
     def get_dir_list(self):
         return [i for i in self.files_list if os.path.isdir(os.path.join(self.cwd, i))]
 
+    def make_todir_path(self, dr):
+        return os.path.join(self.cwd, dr)
+
+    #* builds path for all dirs for a given path
     def make_todirs_path(self):
         return [os.path.join(self.cwd, i) for i in self.dir_list]
     
@@ -44,12 +48,12 @@ class Info:
             return False
         return True
 
-    def check_isfinished(self, file):
+    def check_isfinished(self, path, file):
         #* check if there is .txt log file
         match_txt = re.search(fr"{self.file_finished[0]}\Z", file)
         
         if match_txt is not None:
-            f = Extracter(os.getcwd(), "None").read_file(file)
+            f = Extracter(os.getcwd(), "None").read_file(path, file)
             for i in f:
                 if self.key_word_finished in i:
                     return True
@@ -84,7 +88,7 @@ class MCU(Info):
         for i in os.listdir(path):
             os.chdir(path)
             toadd_folder = os.path.split(os.getcwd())[-1]
-            if self.check_isfinished(i):
+            if self.check_isfinished(path, i):
                 self.add_calcs_finished(toadd_folder)
                 break
             elif self.check_isinprogress(i):

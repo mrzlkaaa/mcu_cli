@@ -8,10 +8,10 @@ import subprocess
 import asyncio
 
 class Run(Handler):
-    def __init__(self, file_name, files:list, cores:int):
-        super().__init__(files)
+    def __init__(self, file_name, towork_with_files:list, cores:int):
+        super().__init__(towork_with_files)
         self.file_name = file_name
-        self.file:str
+        self.folder:str
         self.cores = cores if cores==1 else self.cores_distribution(cores)
         self.plan_histories:int = 1
         self.calculation_steps: list = [1]
@@ -20,12 +20,12 @@ class Run(Handler):
     def cores_distribution(self, cores):
         print(cores)
         try:
-            cores:int = round(cores/len(self.files))
+            cores:int = round(cores/len(self.towork_with_files))
             return cores
         except ZeroDivisionError:
             print("No files to run")
         except Exception as e:
-            print(e)
+            raise e
 
     def read_file(self, file):
         with open(file) as f:
@@ -77,7 +77,7 @@ class Run(Handler):
         last_printed_histories:int
         current_step:int = 1
         success:bool = True
-        bar = Progress_bar(share, current_step, len(self.calculation_steps), self.file)
+        bar = Progress_bar(share, current_step, len(self.calculation_steps), self.folder)
         while run==True:
             try:
                 context = self.read_file(self.LOG_FILE) #todo what if file already exists
@@ -123,12 +123,11 @@ class Run(Handler):
             print(f'[stderr]\n{stderr.decode()}')
 
 
-    def prep_path(self, file, code=None):
+    def prep_path(self, folder_path, code=None):
         if code is None:
             code = "a"
-        self.file = file
-        dr = os.path.join(self.cwd, self.file)
-        os.chdir(dr)
+        os.chdir(folder_path)
+        self.folder = os.path.split(folder_path)[-1]
         file_name = self.input_analyzing
         self.cmd = f'{self.config["GENERAL"]["MCUMPI_BAT"]} > {self.LOG_FILE} f {file_name} {code} {self.cores}'
         asyncio.run(self.async_loop())
@@ -136,10 +135,10 @@ class Run(Handler):
     
     def run(self):
         
-        if not len(self.files)>0:
+        if not len(self.towork_with_files)>0:
             return print("No files to run")
         with concurrent.futures.ProcessPoolExecutor() as executor:
-            resulted = [executor.submit(self.prep_path, i) for i in self.files]
+            resulted = [executor.submit(self.prep_path, i) for i in self.towork_with_files] 
         # iterate over all submitted tasks and get results as they are available
         for future in resulted:
             # get the result for the next completed task
