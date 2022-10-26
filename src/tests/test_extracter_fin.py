@@ -15,9 +15,6 @@ dd_fr:defaultdict = {
         '/mnt/c/Users/Nikita/Desktop/codes/mcu_code_runner/src/test_data/fin': ['5001_mini.FIN', 'BNCT_dis.FIN', 'BNCT_heat.FIN', 'BNCT_spec.FIN']
         }
 
-test_data_fin:str = "test_data/fin"
-test_data_keff_fin = "test_data/keff"
-
 @pytest.fixture
 def fin_keff():
     return Fin(dd_keff, "keff")
@@ -35,14 +32,6 @@ def test_match_code(fin_keff):
     f = fin_keff.search_keyword
     assert type(f) == str
 
-
-def test_fr_datablocks(tests_file_path):
-    fin_obj = Fin("flux", tests_file_path, "FIN", "dis")
-    func_str = fin_obj.fr_datablocks.__name__
-    get_func = getattr(fin_obj, func_str)
-    dd = get_func()
-    fin_obj.fr_excel_export()
-    assert len(dd) < 0
 
 @pytest.mark.asyncio
 async def test_keff_data(fin_keff):

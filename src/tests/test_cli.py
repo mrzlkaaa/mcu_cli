@@ -17,8 +17,11 @@ def test_status():
     assert 0
 
 def test_extract_fin():
-    path = PATH(test_data_keff_fin)
     asyncio.run(CLI().extract_fin(code="keff"))
+    assert 0
+
+def test_extract_rez():
+    asyncio.run(CLI().extract_rez(code="selected"))
     assert 0
 
 @pytest.mark.asyncio
