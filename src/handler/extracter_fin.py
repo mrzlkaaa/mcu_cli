@@ -1,9 +1,10 @@
 from typing import final
 from .main import Extracter
-from .excel_exporter import Excel_exporter
 from  collections import defaultdict
 import numpy as np
 import asyncio
+import os
+import re
 
 
 class Fin(Extracter):
@@ -14,25 +15,21 @@ class Fin(Extracter):
     FLUX:str = "FLUX."
     REACTRATE:str = "REACTION:"
 
-    def __init__(self, code:str, folder_path:str, extension:str, file_name:str=None):
-        super().__init__(folder_path, extension, file_name)
-        self.code = code.upper()  #* what exactly to extract (flux, rates and so on)
+    def __init__(self, towork_with_files, code:str):
+        super().__init__(towork_with_files, code)
+        
         self.search_keyword, self.extract_method, \
-             self.split_index = self.match_code()
-        # self.last_added_dd:str
-        self.data_blocks = dict()
-        # self.extract_method()
-        # self.keyword = 
-        return
+             self.export_method = self.match_code()
+        
 
     def match_code(self):
         match self.code:
             case "KEFF":
-                return self.KEFF, getattr(self, "keff_data"), np.arange(-2,1)
+                return self.KEFF, getattr(self, "keff_extraction"), getattr(self, "keff_excel_export")
             case "FLUX":
-                return self.FLUX, getattr(self, "fr_datablocks"), -1
+                return self.FLUX, getattr(self, "fr_extraction"), getattr(self, "fr_excel_export") 
             case "RATE":
-                return self.REACTRATE, getattr(self, "fr_datablocks"), 1
+                return self.REACTRATE, getattr(self, "fr_datablocks"), getattr(self, "fr_excel_export") 
             case "NHEAT":
                 return self.NEUT_HEAT, 0
             case "PHEAT":
@@ -40,110 +37,81 @@ class Fin(Extracter):
             case "" | None:
                 return None
 
-    @property
-    def excel_writer(self):
-        return Excel_exporter(file_name=f"{self.folder_path.split()[-1]}_{self.code}.xlsx")
+    #* applied for keffs
+    async def keff_extraction(self, path, key_folder, files):
+        for file in files:
+            self.data_blocks[key_folder][file] = defaultdict(list)
+            self.data_blocks[key_folder][file]["0-th block"] = defaultdict(list)
+            db_toblock_navigation = self.data_blocks[key_folder][file]["0-th block"]
+            for _, lc in enumerate(self.read_file(path, file), start=0):
+                if self.search_keyword in lc and not "(" in lc:
+                    key_param_name = " ".join(lc.split()[:2])
+                    values = np.array(lc.split()[-2:], dtype=np.float64)
+                    db_toblock_navigation[key_param_name] = values
 
-    # def start(self):
-    #     return self.extract_method()
-
-    def get_last_added_db(self, i):
-        
-        return list(self.data_blocks[i].keys())[len(self.data_blocks[i].keys())-1]
-
-    async def keff_data(self):
-        
-        print(f"do {self.folder_path}")
-        for _, i in enumerate(self.file):
-            self.data_blocks[i] = defaultdict(list)
-            self.data_blocks[i][f"{i}"] = defaultdict(list)
-            for nn, c in enumerate(self.read_file(i), start=1):
-                if self.search_keyword in c and not "(" in c:
-                    last_added_db = self.get_last_added_db(i)
-                    splitted = c.split()
-                    # print(nn, splitted[-2:])
-                    self.data_blocks[i][last_added_db]["NAMES"] \
-                        .append(f"{splitted[0]} {splitted[1]}")
-                    if isinstance(self.data_blocks[i][last_added_db]["VALUES"], list):
-                        self.data_blocks[i][last_added_db]["VALUES"] = defaultdict(list)
-                    self.data_blocks[i][last_added_db]["VALUES"][f"{splitted[0]} {splitted[1]}"] \
-                        .append(np.array(splitted[-2:], dtype=np.float64))
-        return self.keff_excel_export()
-
-
-    def heat_data_blocks(self):
-        return
+    def keff_excel_export(self):
+        for folder, files in self.data_blocks.items():
+            excel_export = self.excel_writer(folder)
+            print(folder)
+            for file, blocks in files.items():
+                excel_export.sheet = file
+                for name_block, data_block in blocks.items():
+                    excel_export.write_header(name_block, 0) #* writes name of block at the top
+                    for key, values in data_block.items():
+                        excel_export.write_row([key, *values])
+                        excel_export.position_row += 1
+                    excel_export.position_row_reset()
+            excel_export.wb.close()
 
     #* applied for fluxes and reac_rates
-    async def fr_datablocks(self):
-        last_added_db: str = ''
-        val:int = 0
+    async def fr_extraction(self, path, key_folder, files):
         switcher:bool = False
-        for _, i in enumerate(self.file):
-            self.data_blocks[i] = defaultdict(list)
-            for nn, c in enumerate(self.read_file(i), start=1):
-                if self.PART_TYPE in c:
-                    # self.data_blocks[i][f"particle_block-{nn}"]
-                    self.data_blocks[i][f"particle_block-{nn}"] = defaultdict(list)
-                if self.search_keyword in c:
-                    last_added_db = self.get_last_added_db(i)  #list(self.data_blocks[i].keys())[len(self.data_blocks[i].keys())-1]
-                    
-                    self.data_blocks[i][last_added_db]["NAMES"] \
-                        .append((nn, c.split()[self.split_index]))
-                    val = self.data_blocks[i][last_added_db]["NAMES"][-1][0]
-                    if isinstance(self.data_blocks[i][last_added_db]["VALUES"], list):
-                        self.data_blocks[i][last_added_db]["VALUES"] = defaultdict(list)
+        for file in files:
+            ln_keyword_detected: int = 0
+            data_block_num:int = 0
+            self.data_blocks[key_folder][file] = defaultdict(list)
+            for ln, lc in enumerate(self.read_file(path, file), start=0):
+                if self.PART_TYPE in lc:
+                    data_block_num+=1
+                    self.data_blocks[key_folder][file][f"{data_block_num}-th block"] = defaultdict(list)
+                    db_toblock_navigation = self.data_blocks[key_folder][file][f"{data_block_num}-th block"]
+                if self.search_keyword in lc:
+                    obj_name = lc.split()[-1]
+                    db_toblock_navigation[obj_name] = dict()
+                    ln_keyword_detected = ln
                     switcher = not switcher
-                elif val != 0 and nn-val >= 2 and switcher:
-                    if len(c) < 3:
+                elif ln -ln_keyword_detected >= 2 and switcher:
+                    if not re.search(r"\S+", lc):
                         switcher = not switcher
                         continue
-                    last_added_name = str(self.data_blocks[i][last_added_db]['NAMES'][-1][-1])
-                    self.data_blocks[i][last_added_db]["VALUES"][last_added_name] \
-                        .append(np.array(c.strip().split(), dtype=np.float64))
-                        
-        return self.fr_excel_export()
+                    key_param_name = lc.split()[0]
+                    values = np.array(lc.split()[-2:], dtype=np.float64)
+                    db_toblock_navigation[obj_name][key_param_name] = values
+
 
 
     def fr_excel_export(self):
-        excel_export = self.excel_writer
-        for file, file_data in self.data_blocks.items():
-            shift_col:int = 0
-            excel_export.sheet = file
-            for particle_block, particle_block_data in file_data.items():
-                excel_export.write_block(particle_block, shift_col)
-                shift_col+=1
-                for particle_block_keys in particle_block_data["NAMES"]:
-                    key = particle_block_keys[-1] if isinstance(particle_block_keys, tuple) else particle_block_keys
-                    concentrated_arr = np.concatenate(particle_block_data["VALUES"][key])
-                    try:
-                        row = int(concentrated_arr.size/3)
-                        values_reshaped = np.reshape(concentrated_arr, (row, 3))
-                    except ValueError:
-                        row = int(concentrated_arr.size/2)
-                        values_reshaped = np.reshape(concentrated_arr, (row, 2))
-                    
-                    excel_export.write_key(key)
-                    excel_export.write_val(values_reshaped, True)
-        
-        excel_export.wb.close()
+        for folder, files in self.data_blocks.items():
+            excel_export = self.excel_writer(folder)
+            print(folder)
+            for file, blocks in files.items():
+                excel_export.sheet = file
+                row_shift:int = 0
+                for name_block, data_block in blocks.items():
+                    excel_export.write_header(name_block, 0) #* writes name of block at the top
+                    for param_name, param_data in data_block.items():
+                        excel_export.write_header(param_name, excel_export.position_row - 1) #* writes name of data at the top
+                        for key, values in param_data.items():
+                            excel_export.write_row([key, *values])
+                            excel_export.position_row += 1
+                        excel_export.position_row += 2
+                    excel_export.position_row_reset()
+                    excel_export.position_col += 5
+                excel_export.position_col_reset()
+            excel_export.wb.close()
 
-    def keff_excel_export(self):
-        excel_export = self.excel_writer
-        excel_export.sheet = "Keff"
-        
-        shift_col:int = 0
-        for file, file_data in self.data_blocks.items():
-            excel_export.write_block(file, shift_col)
-            shift_col+=1
-            for block, block_data in file_data.items():
-                excel_export.write_col(block_data["NAMES"])
-                for block_keys in block_data["NAMES"]:
-                    values = block_data["VALUES"][block_keys]
-                    excel_export.write_val(values)
-
-        excel_export.wb.close()
-
+    def heats_extraction(self): #todo handler of heating data from .FIN
+        return
 
 
 

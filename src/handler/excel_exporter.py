@@ -7,8 +7,8 @@ class Excel_exporter():
     def __init__(self, **kwargs):
         self.wb = xlsxwriter.Workbook(kwargs.get("file_name"))
         self._sheet = None
-        self._origin = self.origin
-        self.position = {"row":1,"col":1}
+        self._position_row = 2
+        self._position_col = 1
         self._block_format = self.block_format
         self._values_format = self.values_format
 
@@ -33,38 +33,67 @@ class Excel_exporter():
         self._sheet = self.wb.add_worksheet(sheet)
         
     @property
-    def origin(self):
-        Position = namedtuple("origin", ["row", "col"])
-        return Position(1, 1)
+    def position_row(self):
+        return self._position_row
+
+    @position_row.setter
+    def position_row(self, val):
+        self._position_row = val
+
+    @property
+    def position_col(self):
+        return self._position_col
+
+    @position_col.setter
+    def position_col(self, val):
+        self._position_col = val
+
+    def position_row_reset(self):
+        self.position_row = 2
+
+    def position_col_reset(self):
+        self.position_col = 1
+
+    @property
+    def shift_col(self):
+        return self._shift_col
+
+    @shift_col.setter
+    def shift_col(self, val):
+        self._shift_col = val
+
 
     def cells_num(self, text):
         return round(len(text)/self.DEFAULT_CELL_SIZE)
 
     def cell_size(self, text):
         return round(self.DEFAULT_CELL_SIZE*len(text)/self.DEFAULT_CELL_SIZE)
-        
-    def write_block(self, block, shift):
-        self.position["row"], self.position["col"] = 1, 1
-        self.position["col"] += 5*shift
-        self.sheet.write(self.position["row"], self.position["col"], block)
-        self.position["row"]+=2
 
-    def write_key(self, key):
-        self.sheet.write(self.position["row"], self.position["col"], "M/Z/O/E")
-        self.sheet.write(self.position["row"], self.position["col"]+1, key)
-        self.position["row"]+=1
-        return
 
-    def write_val(self, values, shift:bool=False):
-        for r, lvalue in enumerate(values, start=1):
-            for c, value in enumerate(lvalue, start=1):
-                self.sheet.write(self.position["row"] , self.position["col"]+c, value, self.values_format)
-            self.position["row"]+=1
-        if shift: self.position["row"]+=2
+    #! make a shift an instance variable 
+    def write_header(self, text, row):
+        self.sheet.write(row, self.position_col, text)
 
-    def write_col(self, values):
-        for n, value in enumerate(values):
-            self.sheet.write(self.position["row"]+n, self.position["col"], value, self.values_format)
+    # #todo give an example what data_block template is
+    # def write_data_block(self, data_block):
+    #     self.position["row"], self.position["col"] = 2, 1
+    #     # print(self.position["col"])
+    #     self.position["col"] += 5*self.shift_col
+    #     # self.position["row"] += 5*self.shift_row
+    #     for k, block_values in data_block.items():
+    #         self.sheet.write(self.position["row"], self.position["col"], k)
+    #         self.write_col(block_values)
+    #         self.position["row"]+=1
 
-    def write_row(self):
-        return
+    # def write_key(self, key): #! not revised
+    #     self.sheet.write(self.position["row"], self.position["col"], "M/Z/O/E")
+    #     self.sheet.write(self.position["row"], self.position["col"]+1, key)
+    #     self.position["row"]+=1
+    #     return
+
+    # def write_col(self, values):
+    #     for n, value in enumerate(values, start=1):
+    #         self.sheet.write(self.position["row"], self.position["col"]+n, value, self.values_format)
+
+    def write_row(self, row:list):
+        self.sheet.write_row(self.position_row, self.position_col, row)

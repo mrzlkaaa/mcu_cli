@@ -10,25 +10,24 @@ PATH = lambda x: os.path.join(os.path.split(os.path.dirname(__file__))[0], x)
 test_data:str = "test_data/fin"
 test_data_keff_fin = "test_data/keff"
 
-def test_run():
-    asyncio.run(CLI(mpi=20).run())
-    assert 0
-
 # @pytest.mark.asyncio
 def test_status():
     asyncio.run(CLI().status())
     # await CLI().status()
     assert 0
 
-def test_extract():
-    path = PATH(test_data_keff_fin)
-    asyncio.run(CLI().extract(code="keff", extension=".FIN"))
+def test_extract_fin():
+    asyncio.run(CLI().extract_fin(code="keff"))
+    assert 0
+
+def test_extract_rez():
+    asyncio.run(CLI().extract_rez(code="selected"))
     assert 0
 
 @pytest.mark.asyncio
 async def test_run():
-    folder_name2 = f"f1"
-    await CLI(mpi=20).run(folder_name2)
+    # folder_name2 = f"f1"
+    CLI(mpi=20).run()
     assert 0
 
 @pytest.mark.asyncio
