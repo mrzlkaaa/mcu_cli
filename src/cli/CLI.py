@@ -5,6 +5,7 @@ from handler.main import Handler
 from handler.info import MCU
 from handler.run import Run
 from handler.extracter_fin import Fin
+from handler.extracter_rez import Rez
 from handler.clear import Clear
 from handler.copy import Copy
 from handler.filter import Filter
@@ -108,9 +109,16 @@ class CLI:
         print(filtered)
         await Fin(filtered, code).run()
         
-    async def extract_rez(self):  #todo method under development
+    async def extract_rez(self, *key, **params):  #todo method under development
+        code = params["code"]
         await self.get_status_info()
-        return "method under development"
+        onclear:list = self.mcu_info.finished
+        if len(key)>0:
+            onclear = self.key_filter(key, onclear)
+        onclear_paths = [self.mcu_info.make_todir_path(i) for i in onclear]
+        filtered = Filter(onclear_paths, "byregex", 'REZ\\Z').filter()
+        print(filtered)
+        await Rez(filtered, code).run()
 
     async def clear(self, *key):
         await self.get_status_info()
