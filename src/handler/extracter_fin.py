@@ -1,6 +1,5 @@
 from typing import final
 from .main import Extracter
-from .excel_exporter import Excel_exporter
 from  collections import defaultdict
 import numpy as np
 import asyncio
@@ -21,7 +20,7 @@ class Fin(Extracter):
         
         self.search_keyword, self.extract_method, \
              self.export_method = self.match_code()
-        self.data_blocks = dict()
+        
 
     def match_code(self):
         match self.code:
@@ -38,20 +37,6 @@ class Fin(Extracter):
             case "" | None:
                 return None
 
-    def excel_writer(self, name):
-        return Excel_exporter(file_name=f"{name}.xlsx")
-
-    async def run(self):
-        background_tasks = []
-        for path, files in self.towork_with_files.items():
-            key_folder = os.path.split(path)[-1]
-            self.data_blocks[key_folder] = defaultdict(list)
-            background_task = asyncio.create_task(self.extract_method(path, key_folder, files))
-            background_tasks.append(background_task)
-        await asyncio.gather(*background_tasks)
-        self.export_method()
-
-
     #* applied for keffs
     async def keff_extraction(self, path, key_folder, files):
         for file in files:
@@ -64,9 +49,19 @@ class Fin(Extracter):
                     values = np.array(lc.split()[-2:], dtype=np.float64)
                     db_toblock_navigation[key_param_name] = values
 
-
-    def heats_extraction(self): #todo handler of heating data from .FIN
-        return
+    def keff_excel_export(self):
+        for folder, files in self.data_blocks.items():
+            excel_export = self.excel_writer(folder)
+            print(folder)
+            for file, blocks in files.items():
+                excel_export.sheet = file
+                for name_block, data_block in blocks.items():
+                    excel_export.write_header(name_block, 0) #* writes name of block at the top
+                    for key, values in data_block.items():
+                        excel_export.write_row([key, *values])
+                        excel_export.position_row += 1
+                    excel_export.position_row_reset()
+            excel_export.wb.close()
 
     #* applied for fluxes and reac_rates
     async def fr_extraction(self, path, key_folder, files):
@@ -94,6 +89,7 @@ class Fin(Extracter):
                     db_toblock_navigation[obj_name][key_param_name] = values
 
 
+
     def fr_excel_export(self):
         for folder, files in self.data_blocks.items():
             excel_export = self.excel_writer(folder)
@@ -114,22 +110,8 @@ class Fin(Extracter):
                 excel_export.position_col_reset()
             excel_export.wb.close()
 
-    def keff_excel_export(self):
-        for folder, files in self.data_blocks.items():
-            excel_export = self.excel_writer(folder)
-            print(folder)
-            for file, blocks in files.items():
-                excel_export.sheet = file
-                for name_block, data_block in blocks.items():
-                    excel_export.write_header(name_block, 0) #* writes name of block at the top
-                    for key, values in data_block.items():
-                        excel_export.write_row([key, *values])
-                        excel_export.position_row += 1
-                    excel_export.position_row_reset()
-            excel_export.wb.close()
-
-        
-
+    def heats_extraction(self): #todo handler of heating data from .FIN
+        return
 
 
 

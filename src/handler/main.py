@@ -1,7 +1,10 @@
 # from . import load_options
 import os
 import re
+import asyncio
 from . import load_options
+from collections import defaultdict
+from .excel_exporter import Excel_exporter
 
 # import time
 # from colorama import Back
@@ -15,24 +18,18 @@ class Handler:
         self.cwd = os.getcwd() #?
         self.dir= os.path.dirname(__file__) #?
         self.config = load_options()
-        self.towork_with_files = towork_with_files #* files are given in defaultdict with paths
-
-    @property
-    def check_folders(self):
-        d: dict = {}
-        for files in [x[0] for x in os.walk(self.cwd)]:
-            if not files == self.cwd:
-                d[os.path.join(self.cwd, files)] = {1 if re.search(self.FIN, i) is not None \
-                    else 0 if re.search(self.INI, i) is not None else -1 for i in os.listdir(os.path.join(self.cwd, files))}
-        # print(d)
-        return d
+        self.towork_with_files = towork_with_files  #* files are given in defaultdict with paths
+        
 
 class Extracter(Handler): #todo must takes file, dirs from Info interface!
     
     def __init__(self, towork_with_files:str, code:str):
         super().__init__(towork_with_files)
-        self.code = code.upper()  #* what exactly to extract (flux, rates and so on)
+        self.code = code.upper()   #* what exactly to extract (flux, rates and so on)
+        self.data_blocks = dict()  #*  data stores in dict which expands to defaultdict depends on handling file
 
+    def excel_writer(self, name):
+        return Excel_exporter(file_name=f"{name}.xlsx")
 
     def read_file(self, parent_path, file):
         try:
@@ -44,4 +41,13 @@ class Extracter(Handler): #todo must takes file, dirs from Info interface!
         except Exception as e:
             print(e)
 
-        
+    async def run(self):
+        background_tasks = []
+        for path, files in self.towork_with_files.items():
+            key_folder = os.path.split(path)[-1]
+            self.data_blocks[key_folder] = defaultdict(list)
+            print(path, key_folder, files)
+            background_task = asyncio.create_task(self.extract_method(path, key_folder, files))
+            background_tasks.append(background_task)
+        await asyncio.gather(*background_tasks)
+        self.export_method() #*  writes data to excel file
