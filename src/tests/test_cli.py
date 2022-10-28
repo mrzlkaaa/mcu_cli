@@ -16,6 +16,10 @@ def test_status():
     # await CLI().status()
     assert 0
 
+def test_post_processing():
+    asyncio.run(CLI().post_processing())
+    assert 0
+
 def test_extract_fin():
     asyncio.run(CLI().extract_fin(code="keff"))
     assert 0

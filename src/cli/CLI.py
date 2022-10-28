@@ -9,6 +9,7 @@ from handler.extracter_rez import Rez
 from handler.clear import Clear
 from handler.copy import Copy
 from handler.filter import Filter
+from handler.post_processing import Post_processing
 import __main__
 import fire
 import os
@@ -94,9 +95,18 @@ class CLI:
         if len(key)>0:
             onrun = self.key_filter(key, onrun)
         onrun_paths = [self.mcu_info.make_todir_path(i) for i in onrun]
-        
         Run(self.file_name, onrun_paths, self.mpi).run()
 
+    async def post_processing(self, *key, **params):
+        code = params["code"]
+        await self.get_status_info()
+        onclear:list = self.mcu_info.finished
+        if len(key)>0:
+            onclear = self.key_filter(key, self.mcu_info.finished)
+        onclear_paths = [self.mcu_info.make_todir_path(i) for i in onclear]
+        filtered = Filter(onclear_paths, "byregex", 'DAT\\Z|FIN_B\\d+').filter()
+        filtered = Filter(filtered, "byregex", 'DAT\\Z').filter()
+        Post_processing(filtered, code).DAT_edit_run()
 
     async def extract_fin(self, *key, **params):
         code = params["code"]

@@ -20,16 +20,12 @@ class Handler:
         self.config = load_options()
         self.towork_with_files = towork_with_files  #* files are given in defaultdict with paths
         
-
-class Extracter(Handler): #todo must takes file, dirs from Info interface!
-    
-    def __init__(self, towork_with_files:str, code:str):
-        super().__init__(towork_with_files)
-        self.code = code.upper()   #* what exactly to extract (flux, rates and so on)
-        self.data_blocks = dict()  #*  data stores in dict which expands to defaultdict depends on handling file
-
-    def excel_writer(self, name):
-        return Excel_exporter(file_name=f"{name}.xlsx")
+    def write_file(self, parent_path, file, content):
+        try:
+            with open(os.path.join(parent_path, file), "w", errors='ignore') as f:
+                f.writelines(content)
+        except Exception as e:
+            print(e)
 
     def read_file(self, parent_path, file):
         try:
@@ -40,6 +36,16 @@ class Extracter(Handler): #todo must takes file, dirs from Info interface!
             print(fnfe)
         except Exception as e:
             print(e)
+
+class Extracter(Handler): #todo must takes file, dirs from Info interface!
+    
+    def __init__(self, towork_with_files:str, code:str):
+        super().__init__(towork_with_files)
+        self.code = code.upper()   #* what exactly to extract (flux, rates and so on)
+        self.data_blocks = dict()  #*  data stores in dict which expands to defaultdict depends on handling file
+
+    def excel_writer(self, name):
+        return Excel_exporter(file_name=f"{name}.xlsx")
 
     async def run(self):
         background_tasks = []
