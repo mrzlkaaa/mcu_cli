@@ -43,7 +43,7 @@ class Info:
         return [os.path.join(self.cwd, i) for i in self.dir_list]
     
     def check_isinprogress(self, file):
-        match = re.search(fr"{self.file_inprogress}\Z", file)
+        match = re.search(fr"\{self.file_inprogress[0]}{self.file_inprogress[1:]}\Z", file)
         if match is None:
             return False
         return True
@@ -57,6 +57,7 @@ class Info:
             for i in f:
                 if self.key_word_finished in i:
                     return True
+        #! this will match any that consists of FIN letter (need to define . (dot) explicitly)
         match_fin = re.search(fr"{self.file_finished[1]}\Z", file)
 
         if match_fin is not None:

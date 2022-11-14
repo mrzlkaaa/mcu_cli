@@ -15,13 +15,21 @@ dd_fr:defaultdict = {
         '/mnt/c/Users/Nikita/Desktop/codes/mcu_code_runner/src/test_data/fin': ['5001_mini.FIN', 'BNCT_dis.FIN', 'BNCT_heat.FIN', 'BNCT_spec.FIN']
         }
 
+dd_r:defaultdict = {
+        '/mnt/c/Users/Nikita/Desktop/codes/mcu_code_runner/src/test_data/fin': ['5001_mini_rr.FIN']
+        }
+
 @pytest.fixture
 def fin_keff():
     return Fin(dd_keff, "keff")
 
 @pytest.fixture
-def fin_fr():
+def fin_f():
     return Fin(dd_fr, "flux")
+
+@pytest.fixture
+def fin_r():
+    return Fin(dd_r, "rate")
 
 def test_basics(fin_keff):
     print(fin_keff.toextract_files)
@@ -40,8 +48,13 @@ async def test_keff_data(fin_keff):
     assert 0
 
 @pytest.mark.asyncio
-async def test_fr_data(fin_fr):
-    await fin_fr.run()
+async def test_f_data(fin_f):
+    await fin_f.run()
+    assert 0
+
+@pytest.mark.asyncio
+async def test_r_data(fin_r):
+    await fin_r.run()
     assert 0
 
     

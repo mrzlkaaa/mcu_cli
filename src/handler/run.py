@@ -64,7 +64,8 @@ class Run(Handler):
             self.plan_histories *= int(i)
         return file_name
 
-
+    #! requered significant revision (move while loop to Progress Bar interface
+    #! to make the Progress Bar idea use clear and reusable)
     async def async_loop(self):
         self.check_log_exists()
         proc = await asyncio.create_subprocess_shell(
@@ -129,7 +130,7 @@ class Run(Handler):
         os.chdir(folder_path)
         self.folder = os.path.split(folder_path)[-1]
         file_name = self.input_analyzing
-        self.cmd = f'{self.config["GENERAL"]["MCUMPI_BAT"]} > {self.LOG_FILE} f {file_name} {code} {self.cores}'
+        self.cmd = f'{self.config["GENERAL"]["MCUMPI_BAT"]} >> {self.LOG_FILE} f {file_name} {code} {self.cores}' #* >> to append file (in case run restarting)
         asyncio.run(self.async_loop())
         return
     

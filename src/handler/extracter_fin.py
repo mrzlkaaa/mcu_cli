@@ -29,7 +29,7 @@ class Fin(Extracter):
             case "FLUX":
                 return self.FLUX, getattr(self, "fr_extraction"), getattr(self, "fr_excel_export") 
             case "RATE":
-                return self.REACTRATE, getattr(self, "fr_datablocks"), getattr(self, "fr_excel_export") 
+                return self.REACTRATE, getattr(self, "fr_extraction"), getattr(self, "fr_excel_export") 
             case "NHEAT":
                 return self.NEUT_HEAT, 0
             case "PHEAT":
@@ -77,6 +77,8 @@ class Fin(Extracter):
                     db_toblock_navigation = self.data_blocks[key_folder][file][f"{data_block_num}-th block"]
                 if self.search_keyword in lc:
                     obj_name = lc.split()[-1]
+                    if self.code == "RATE":  #? temporary solution to export data with the same zone/mat/obj name in a single same block
+                        obj_name = " ".join(lc.split()[:2]) + " " + " ".join(lc.split()[-2:])
                     db_toblock_navigation[obj_name] = dict()
                     ln_keyword_detected = ln
                     switcher = not switcher

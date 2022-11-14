@@ -57,5 +57,8 @@ class Filter:
                 if self.method(file):
                     filtered[path].append(file)
                 continue
+        if not len(filtered) > 0:
+            raise IndexError("No folders left after filtering")  #*prevent errors on other interfaces due to empty dictionary
+
         return filtered
                 

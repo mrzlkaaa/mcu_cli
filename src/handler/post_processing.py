@@ -26,6 +26,8 @@ class Post_processing(Handler): #* should inherits from Run?
                 self.write_file(folder, file, content)
                 self.run_command(file)
 
+    #? best way to get input file name 
+    #todo idk whether to move it to Filter interface
     def remove_extension(self, string):
         return string.split(".")[0]
 

@@ -5,32 +5,39 @@ from handler.info import Info, MCU
 
 
 @pytest.fixture
-def test_info():
+def info_obj():
     info = Info()
     return info
 
 @pytest.fixture
-def test_mcu_info():
+def mcu_obj():
     info = MCU()
     return info
 
 
-def test_get_dirs_files(test_info):
-    print(test_info.dir_list)
-    print(test_info.files_list)
-    print(test_info.paths_todirs)
+def test_get_dirs_files(info_obj):
+    print(info_obj.dir_list)
+    print(info_obj.files_list)
+    print(info_obj.paths_todirs)
     
     assert 0
 
-def test_mcu_folder_check(test_mcu_info):
-    asyncio.run(test_mcu_info.calc_status())
-    print(test_mcu_info.onrun)
-    print(test_mcu_info.inprogress)
-    print(test_mcu_info.finished)
+def test_mcu_folder_check(mcu_obj):
+    asyncio.run(mcu_obj.calc_status())
+    print(mcu_obj.onrun)
+    print(mcu_obj.inprogress)
+    print(mcu_obj.finished)
     assert 0
 
-def test_dir_list_property(test_info):
-    test_info.dir_list = ["f1", "log"]
-    print(test_info.dir_list)
-    print(test_info.paths_todirs)
+def test_dir_list_property(info_obj):
+    info_obj.dir_list = ["f1", "log"]
+    print(info_obj.dir_list)
+    print(info_obj.paths_todirs)
+    assert 0
+
+def test_check_isinprogress(mcu_obj):
+    file = "5001_mini"
+    mcu_obj.check_isinprogress(file)
+    file = "5001_mini.ini"
+    mcu_obj.check_isinprogress(file)
     assert 0

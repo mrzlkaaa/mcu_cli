@@ -130,12 +130,17 @@ class CLI:
         print(filtered)
         await Rez(filtered, code).run()
 
+    #! not revised
     async def clear(self, *key):
         await self.get_status_info()
-        if not len(key)>0:
-            raise TypeError("No keys to clear given")
-        onclear = self.key_filter(key, self.mcu_info.finished)
-        Clear(self.file_name, onclear, self.mpi).clear()
+        # if not len(key)>0:
+        #     raise TypeError("No keys to clear given")
+        onclear:list = [*self.mcu_info.inprogress, *self.mcu_info.finished]
+        if len(key)>0:
+            onclear = self.key_filter(key, onclear)
+        # onclear = self.key_filter(key, self.mcu_info.finished)
+        onclear_paths = [self.mcu_info.make_todir_path(i) for i in onclear]
+        Clear(self.file_name, onclear_paths, self.mpi).clear()
     
     async def copy(self, *key):
         await self.get_status_info()
