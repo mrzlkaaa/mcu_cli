@@ -53,7 +53,7 @@ class Rez(Extracter):
                     values = lc[9:].split()
                     if key_param_name == "Time":
                         values = list(filter(lambda x: x != "d", values))  #* removes "d" character from array
-                    values = self.convert_to_float(values) #* convert it just before added to dd    
+                    values = self.convert_arr_to_float(values) #* convert it just before added to dd    
                     db_toblock_navigation[f"{obj_name}"][key_param_name] = values
 
     def data_excel_export(self):

@@ -64,7 +64,7 @@ def test_data_export(rez):
 @pytest.mark.asyncio
 async def test_data_extraction_export(rez):
     rez.data_blocks["rez"] = defaultdict(list)
-    await rez.data_extraction("/mnt/c/Users/Nikita/Desktop/codes/mcu_code_runner/src/test_data/rez", "rez", ["!5002_mini.REZ"])
+    await rez.data_extraction("/mnt/c/Users/Nikita/Desktop/codes/mcu_code_runner/src/test_data/rez", "rez", ["5001_mini_nl.REZ"])
     rez.data_excel_export()
     assert 0
 

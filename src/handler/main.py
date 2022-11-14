@@ -44,8 +44,15 @@ class Extracter(Handler): #todo must takes file, dirs from Info interface!
         self.code = code.upper()   #* what exactly to extract (flux, rates and so on)
         self.data_blocks = dict()  #*  data stores in dict which expands to defaultdict depends on handling file
 
-    def convert_to_float(self, arr):
-        return list(map(lambda x: float(x), arr))
+    def convert_val_to_float(self, value):
+        try:
+            value = float(value)
+            return value
+        except ValueError:
+            return value
+
+    def convert_arr_to_float(self, arr):
+        return list(map(self.convert_val_to_float, arr))
 
     def excel_writer(self, name):
         return Excel_exporter(file_name=f"{name}.xlsx")
