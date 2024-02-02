@@ -11,13 +11,13 @@ d = {
 }
 
 rows = [
-    ('f1', "Not Finished"), 
-    ('f2', "Not Finished"), 
-    ('f3', "Not Finished"), 
-    ('f4', "Not Finished"), 
-    ('f5', "Not Finished"), 
-    ('f6', "Finished"), 
-    ('f7', "Finished")
+    ('f1', 'Finished / InProgress', 'danger'), 
+    ('f2', 'Avaliable to run', 'good'), 
+    ('f3', 'Avaliable to run', 'good'), 
+    ('f4', 'Avaliable to run', 'good'), 
+    ('f5', 'Avaliable to run', 'good'), 
+    ('f6', 'Finished / InProgress', 'danger'), 
+    ('f7', 'Finished / InProgress', 'danger')
 ]
 
 @pytest.fixture
@@ -34,7 +34,18 @@ def test_table(display):
             "Folder", 
             "Status"
         ],
-        rows=rows,
+        rows_data=rows,
         title="Folders status",
+    )
+    assert 0
+
+def test_progress_bar(display):
+    display.progress_bar()
+
+def test_status(display):
+    display.status(
+        status_text = "Calculation running...",
+        finished_text = "Calculation started successfully",
+        sleep_time = 2
     )
     assert 0

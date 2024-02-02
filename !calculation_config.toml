@@ -1,0 +1,15 @@
+[meta]
+file_name = "burn"
+multistep = true
+
+[control]
+MAXS = 100
+
+[multistep]
+# How to define variables for multistep calcs
+# VARNAME start_value step num_steps
+# Example: RADCH 0.5 0.1 5
+# From Example above RADCH variable will take a value from 0.5 to 1.0 with a step of 0.1
+# The number of steps is equal to number of calculation steps
+
+

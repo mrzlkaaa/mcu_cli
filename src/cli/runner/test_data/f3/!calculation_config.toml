@@ -1,0 +1,36 @@
+[meta]
+file_name = "burn"
+multistep = true
+
+[control]
+MAXS = 100
+
+[multistep]
+    # anytime - is file_name of file (cannot contain dot symbol)
+    # 0 - is number of state. It is created to add multivariablity  
+    [multistep.anyname.0]
+    name = "HCH1"
+    st_value = 1
+    step = 0.1
+    num_steps = 5
+    template = "RPP  N1   -25,120  -15,85   -50,HCH1"
+    root_file_name = "geom_be_tvs_6layer_20.09.2021"
+
+        # has not implemented yet        
+        [multistep.anyname.0.nested]
+        name = "HCH2"
+        st_value = 5
+        step = 0.5
+        num_steps = 2
+        template = "RPP  N2    3,54     3,61.5  -5,HCH2"
+
+    [multistep.anyname.1]
+    name = "RCH"
+    st_value = 1.5
+    step = 0.2
+    num_steps = 3
+    template = "RCZ Nb2   60,54,54   H-50  RCH"
+    root_file_name = "geom_be_tvs_6layer_20.09.2021"
+            
+
+

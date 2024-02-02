@@ -1,7 +1,7 @@
 from . import load_options
 from colorama import Fore
 from handler.main import Handler
-from handler.run import Run
+from cli.runner.run import Run
 from handler.extracter_fin import Fin
 from handler.clear import Clear
 import fire

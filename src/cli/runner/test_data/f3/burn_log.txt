@@ -1,0 +1,190 @@
+  
+ MCU Step: state input
+  
+ MCU Step: state calculation
+ 
+  WARNINGS in initial data of MCU:           0
+  ERRORS   in initial data of MCU:           0
+ 
+ MCU-KOSMOS - Developed by MCU Team - http://mcuproject.ru             
+  Variant:.............. BURNUP
+  Series:...............            0
+  Histories:............            0
+ Attention! Saving to disk. Break is forbidden until finished.
+ Finished.
+ 
+ MCU-KOSMOS - Developed by MCU Team - http://mcuproject.ru             
+  Variant:.............. BURNUP
+  Series:...............            1
+  Histories:............         5000
+ Attention! Saving to disk. Break is forbidden until finished.
+ Finished.
+ 
+ MCU-KOSMOS - Developed by MCU Team - http://mcuproject.ru             
+  Variant:.............. BURNUP
+  Series:...............            2
+  Histories:............        10000
+  Keff-Col(no buckling):   1.406976      (  2.1655001E-03 )
+ Attention! Saving to disk. Break is forbidden until finished.
+ Finished.
+ 
+ MCU-KOSMOS - Developed by MCU Team - http://mcuproject.ru             
+  Variant:.............. BURNUP
+  Series:...............            3
+  Histories:............        15000
+  Keff-Col(no buckling):   1.417712      (  8.8837016E-03 )
+ Attention! Saving to disk. Break is forbidden until finished.
+ Finished.
+ 
+ MCU-KOSMOS - Developed by MCU Team - http://mcuproject.ru             
+  Variant:.............. BURNUP
+  Series:...............            4
+  Histories:............        20000
+  Keff-Col(no buckling):   1.408930      (  1.0110949E-02 )
+ Attention! Saving to disk. Break is forbidden until finished.
+ Finished.
+ 
+ MCU-KOSMOS - Developed by MCU Team - http://mcuproject.ru             
+  Variant:.............. BURNUP
+  Series:...............            5
+  Histories:............        25000
+  Keff-Col(no buckling):   1.410671      (  8.2373703E-03 )
+ Attention! Saving to disk. Break is forbidden until finished.
+ Finished.
+ 
+ MCU-KOSMOS - Developed by MCU Team - http://mcuproject.ru             
+  Variant:.............. BURNUP
+  Series:...............            6
+  Histories:............        30000
+  Keff-Col(no buckling):   1.410380      (  6.8696206E-03 )
+ Attention! Saving to disk. Break is forbidden until finished.
+ Finished.
+ 
+ MCU-KOSMOS - Developed by MCU Team - http://mcuproject.ru             
+  Variant:.............. BURNUP
+  Series:...............            7
+  Histories:............        35000
+  Keff-Col(no buckling):   1.414165      (  6.8521430E-03 )
+ Attention! Saving to disk. Break is forbidden until finished.
+ Finished.
+ 
+ MCU-KOSMOS - Developed by MCU Team - http://mcuproject.ru             
+  Variant:.............. BURNUP
+  Series:...............            8
+  Histories:............        40000
+  Keff-Col(no buckling):   1.411821      (  6.3839168E-03 )
+ Attention! Saving to disk. Break is forbidden until finished.
+ Finished.
+ 
+ MCU-KOSMOS - Developed by MCU Team - http://mcuproject.ru             
+  Variant:.............. BURNUP
+  Series:...............            9
+  Histories:............        45000
+  Keff-Col(no buckling):   1.407744      (  6.8540890E-03 )
+ Attention! Saving to disk. Break is forbidden until finished.
+ Finished.
+ 
+  
+ MCU Step: state final processing
+  
+ MCU Step: burnup
+  === BURNUP_5   Module      === 
+ 
+ begin of BUR_STEP code
+ Variant burn
+ Done           14 %
+ Done           28 %
+ Done           42 %
+ Done           57 %
+ Done           71 %
+ Done           85 %
+ Done          100 %
+ Total          100 %
+ end of BUR_STEP code
+  
+ MCU Step: state input
+  
+ MCU Step: state calculation
+ 
+  WARNINGS in initial data of MCU:           1
+  ERRORS   in initial data of MCU:           0
+ 
+ MCU-KOSMOS - Developed by MCU Team - http://mcuproject.ru             
+  Variant:.............. BURNUP
+  Series:...............            0
+  Histories:............            0
+ Attention! Saving to disk. Break is forbidden until finished.
+ Finished.
+ 
+ MCU-KOSMOS - Developed by MCU Team - http://mcuproject.ru             
+  Variant:.............. BURNUP
+  Series:...............            1
+  Histories:............         5000
+ Attention! Saving to disk. Break is forbidden until finished.
+ Finished.
+ 
+ MCU-KOSMOS - Developed by MCU Team - http://mcuproject.ru             
+  Variant:.............. BURNUP
+  Series:...............            2
+  Histories:............        10000
+  Keff-Col(no buckling):   1.388734      (  2.3632371E-03 )
+ Attention! Saving to disk. Break is forbidden until finished.
+ Finished.
+ 
+ MCU-KOSMOS - Developed by MCU Team - http://mcuproject.ru             
+  Variant:.............. BURNUP
+  Series:...............            3
+  Histories:............        15000
+  Keff-Col(no buckling):   1.395043      (  5.3873714E-03 )
+ Attention! Saving to disk. Break is forbidden until finished.
+ Finished.
+ 
+ MCU-KOSMOS - Developed by MCU Team - http://mcuproject.ru             
+  Variant:.............. BURNUP
+  Series:...............            4
+  Histories:............        20000
+  Keff-Col(no buckling):   1.396132      (  4.1491282E-03 )
+ Attention! Saving to disk. Break is forbidden until finished.
+ Finished.
+ 
+ MCU-KOSMOS - Developed by MCU Team - http://mcuproject.ru             
+  Variant:.............. BURNUP
+  Series:...............            5
+  Histories:............        25000
+  Keff-Col(no buckling):   1.391958      (  4.9956120E-03 )
+ Attention! Saving to disk. Break is forbidden until finished.
+ Finished.
+ 
+ MCU-KOSMOS - Developed by MCU Team - http://mcuproject.ru             
+  Variant:.............. BURNUP
+  Series:...............            6
+  Histories:............        30000
+  Keff-Col(no buckling):   1.391752      (  4.1672694E-03 )
+ Attention! Saving to disk. Break is forbidden until finished.
+ Finished.
+ 
+ MCU-KOSMOS - Developed by MCU Team - http://mcuproject.ru             
+  Variant:.............. BURNUP
+  Series:...............            7
+  Histories:............        35000
+  Keff-Col(no buckling):   1.391675      (  3.5726463E-03 )
+ Attention! Saving to disk. Break is forbidden until finished.
+ Finished.
+ 
+ MCU-KOSMOS - Developed by MCU Team - http://mcuproject.ru             
+  Variant:.............. BURNUP
+  Series:...............            8
+  Histories:............        40000
+  Keff-Col(no buckling):   1.394756      (  4.2514028E-03 )
+ Attention! Saving to disk. Break is forbidden until finished.
+ Finished.
+ 
+ MCU-KOSMOS - Developed by MCU Team - http://mcuproject.ru             
+  Variant:.............. BURNUP
+  Series:...............            9
+  Histories:............        45000
+  Keff-Col(no buckling):   1.398356      (  5.0796741E-03 )
+ Attention! Saving to disk. Break is forbidden until finished.
+ Finished.
+
+The task is finished.

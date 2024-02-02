@@ -1,0 +1,26 @@
+***********************************
+NAMV  fresh_heu_bur_axial
+MAXS  40
+DTZM  10
+FINISH    
+***********************************
+BURN
+CODE   RFTB
+FISZ   1 120
+ABSZ   1250 1465
+DPOW   7190 10.78, 0 2.5,
+ 
+DSTP   10.78 1, 2.5 1,
+ 
+COLI   1
+ZONP   1 120, 1250 1465
+SUMZ   SUMB ZONB
+CONT   DENS
+FINISH
+*************************
+RGS  1 1
+PERC  0
+NRET  4321 UP
+PTYPE  1
+END
+FINISH  

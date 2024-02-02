@@ -1,183 +1,293 @@
-from . import load_options
-from colorama import Fore
-from tabulate import tabulate
-from handler.main import Handler
-from handler.info import MCU
-from handler.run import Run
-from handler.extracter_fin import Fin
-from handler.extracter_rez import Rez
-from handler.clear import Clear
-from handler.copy import Copy
-from handler.filter import Filter
-from handler.post_processing import Post_processing
-import __main__
+
 import fire
 import os
 import re
 import asyncio
 import inspect
 
+import rich
+from . import load_options
+from colorama import Fore
+
+from .display.display import Display
+from .info.info import Info
+from .runner.run import Run
+from .support.main import clear as clear_folder
 
 
-class Prettier():
-    bcolors = {
-        "HEADER": Fore.MAGENTA,
-        "OKGREEN" : Fore.GREEN,
-        "OKCYAN" : Fore.CYAN,
-        "WARNING" : Fore.YELLOW,
-        "FAIL" : Fore.RED,
-        "RESET" : Fore.RESET,
-    }
-    # def __init__(self):
-
-    def colorize(self, string, type, rnge=None):
-        if rnge is None:
-            return f"{self.bcolors[type]}{string}{self.bcolors['RESET']}"
-        formatted_iterable: list = []
-        for _ in range(len(rnge)):
-            formatted_iterable.append(f"{self.bcolors[type]}{string}{self.bcolors['RESET']}")
-        return formatted_iterable
-
+def folders_parser(*folders):
+    #* pattern for both unix and win
+    pattern = r"[^\.\\]+\w+[^\\/]"
+    
+    parsed_folders = []
+    for i in folders:
+        res = re.search(
+            pattern,
+            i
+        )
+        if res is None:
+            raise TypeError(f"Cannot parse {i}")
+        parsed_folders.append(res.group(0))
+    return parsed_folders
 
 class CLI:
     STATUS_HEADER:list = ["Folder", "Status"]
+    '''
+    #* CLI interface to interact with / manage
+    #* MCU files via command prompt
+    #* This interface includes following packages
+    #*  Info - to get information / current status in folders
+    #*  Display - to display information in command prompt
+    #*  Extract
+    #*  Run    
+    #* Parameters
+    #* ----------
+    #*
+    #* Raises
+    #* ----------
+    #*
+    #* Returns
+    #* ----------
+    #*
+    '''
     
-    def __init__(self, filename=None, mpi=None): #todo move args to func?
-        self.options = load_options()
-        self.prettier = Prettier()
-        self.file_name = self.options["DEFAULT_NAME_PATTERN"] if filename is None else filename
+    def __init__(
+        self,
+        folders:tuple | None = None,
+        mpi=None
+    ): #todo move args to func?
+        self.folders = folders
         self.mpi = 1 if mpi is None else mpi
-        # self.mcu_info = self.get_status_info()
-        self.mcu_info = MCU()
+        self.display = Display() #! dependency
+        self.info = Info() #! dependency
+        self.options = load_options() #! dependency
+
+        self.folders_status = self.info.get_folders_status()
         
+
+    def folders_status(func):
+        def wrapper(self, *args, **kwargs):
+            
+            #* kepp folders status up to date
+            #* each request updates
+            #* self.info.torun and self.info.progressed
+            self.info.get_folders_status()
+            func(self, *args, **kwargs)
+            
+        return wrapper
+
+
+    def _str_match(self, string:str):
+        match string:
+            case "finished":
+                return self.info.finished
+            case "inprogress":
+                return self.info.inprogress
+            case "torun":
+                return self.info.torun
+            case _:
+                raise ValueError(f"Given string < {string} > not found among exising cases")
     
-    # def __repr__(self):
-    #     return "use < mcu help > to see avaliable commands >"
+    def args_parse(folders_type:str | None = None):
+        
+        def wrap(func):
+            def wrapped(self, *args, **kwargs):
+                folders = self._str_match(folders_type)
+                if len(args) > 0:
+                    args = folders_parser(*args)
+                    intersected_folders = list(
+                        set(folders).intersection(set(args))
+                    )
+                    if not len(intersected_folders) > 0:
+                        return print(f"Among given folders there are no one classified as < {folders_type} >")
+                        
+                    return func(self, *intersected_folders, **kwargs)
+                elif not len(folders) > 0:
+                    return print(f"There are no folders classified as < {folders_type} >")
+                func(self, *folders, **kwargs)
+                
+            return wrapped
+        return wrap
+
 
     def key_filter(self, key, folders):
         try:
             return list({i for i in folders for j in key if i==re.search(r"[^\\.].*[^\\]", j).group()})
         except AttributeError:
             print("Folder with a given name is not found")
-
-    async def get_status_info(self):
-        await self.mcu_info.calc_status()
-        print("folders checked")
         
-    
-    async def status(self):
-        await self.get_status_info()
-        folder, status = list(map(lambda x: self.prettier.colorize(x, "HEADER"), self.STATUS_HEADER))
-        return print(tabulate({
-                            folder:[
-                                *self.mcu_info.onrun, *self.mcu_info.inprogress, *self.mcu_info.finished
-                            ],
-                            status:[
-                                *self.prettier.colorize("ONRUN", "FAIL", self.mcu_info.onrun),
-                                *self.prettier.colorize("INPROGRESS", "OKCYAN", self.mcu_info.inprogress),
-                                *self.prettier.colorize("FINISHED", "OKGREEN", self.mcu_info.finished)
-                            ]},
-                            headers = "keys",
-                            tablefmt="pretty"))
-
-    async def run(self, *key):
-        await self.get_status_info()
-        onrun:list = self.mcu_info.onrun
-        if len(key)>0:
-            onrun = self.key_filter(key, self.mcu_info.onrun)
-        onrun_paths = [self.mcu_info.make_todir_path(i) for i in onrun]
-        print(self.file_name)
-        Run(self.file_name, onrun_paths, self.mpi).run()
-
-    async def restart(self, *key):
-        await self.get_status_info()
-        onrun = [*self.mcu_info.inprogress, *self.mcu_info.finished]
-        if len(key)>0:
-            onrun = self.key_filter(key, onrun)
-        onrun_paths = [self.mcu_info.make_todir_path(i) for i in onrun]
-        Run(self.file_name, onrun_paths, self.mpi).run()
-
-    async def post_processing(self, *key, **params):
-        code = params["code"]
-        await self.get_status_info()
-        onclear:list = self.mcu_info.finished
-        if len(key)>0:
-            onclear = self.key_filter(key, self.mcu_info.finished)
-        onclear_paths = [self.mcu_info.make_todir_path(i) for i in onclear]
-        filtered = Filter(onclear_paths, "byregex", 'DAT\\Z|FIN_B\\d+').filter()
-        filtered = Filter(filtered, "byregex", 'DAT\\Z').filter()
-        Post_processing(filtered, code).DAT_edit_run()
-
-    async def extract_fin(self, *key, **params):
-        code = params["code"]
-        await self.get_status_info()
-        onclear:list = self.mcu_info.finished
-        if len(key)>0:
-            onclear = self.key_filter(key, onclear)
-        onclear_paths = [self.mcu_info.make_todir_path(i) for i in onclear]
-        filtered = Filter(onclear_paths, "byregex", 'FIN\\Z|FIN_B\\d+').filter()
-        print(filtered)
-        await Fin(filtered, code).run()
+    def get_tree(self):
+        tree = self.info.folder_tree
+        self.display.tree(tree)
         
-    async def extract_rez(self, *key, **params):  #todo method under development
-        code = params["code"]
-        await self.get_status_info()
-        onclear:list = self.mcu_info.finished
-        if len(key)>0:
-            onclear = self.key_filter(key, onclear)
-        onclear_paths = [self.mcu_info.make_todir_path(i) for i in onclear]
-        filtered = Filter(onclear_paths, "byregex", 'REZ\\Z').filter()
-        print(filtered)
-        await Rez(filtered, code).run()
 
-    #! not revised
-    async def clear(self, *key):
-        await self.get_status_info()
-        # if not len(key)>0:
-        #     raise TypeError("No keys to clear given")
-        onclear:list = [*self.mcu_info.inprogress, *self.mcu_info.finished]
-        if len(key)>0:
-            onclear = self.key_filter(key, onclear)
-        # onclear = self.key_filter(key, self.mcu_info.finished)
-        onclear_paths = [self.mcu_info.make_todir_path(i) for i in onclear]
-        Clear(self.file_name, onclear_paths, self.mpi).clear()
+    def get_folders_status(self):
+        self.display.table(cols=self.STATUS_HEADER, rows_data=self.folders_status)
+
     
-    async def copy(self, *key):
-        await self.get_status_info()
-        oncopy:list = self.mcu_info.dir_list
-        if len(key)>0:
-            oncopy = self.key_filter(key, oncopy)
-
-        oncopy_paths = [self.mcu_info.make_todir_path(i) for i in oncopy]
-
-        patterns = [
-            *[fr"{extension}\Z|{extension}_B\d+" for extension in self.mcu_info.options["mcu"]["tocopy"]["files"]],
-            *self.mcu_info.options["mcu"]["filter"]["regex"]
-        ]
-        filtered = Filter(oncopy_paths, "byregex", *patterns).filter()
-        print(filtered)
-        Copy(filtered).copy_as_defaultdict()
-
+    @args_parse("torun")
+    def run(
+        self, 
+        *folders: tuple
+    ):
+        '''
+        #* Promt command to initiate
+        #* mcu code calculations  
+        #* Parameters
+        #* ----------
+        #*
+        #* Raises
+        #* ----------
+        #*
+        #* Returns
+        #* ----------
+        #*
+        '''
+        #! dev mode!
+        dev=0
+        if dev:
+            r = Run(
+                display=self.display, #! dont like it
+                folders=[
+                    # "f1", 
+                    # "f2", 
+                    "f3", 
+                    # "f5"
+                ],
+                dev_path="/mnt/c/Users/Nikita/Desktop/codes/mcu_code_runner/src/cli/runner/test_data",
+                cpu_number=self.mpi
+            )
+            asyncio.run(r.call())
+            return
+        
+        folders = list(folders)
+        r = Run(
+            display=self.display, #! dont like it
+            folders=folders,
+            cpu_number=self.mpi
+        )
+        
+        asyncio.run(r.call())
+        
         return
 
-    async def help(self):
-        return "List of avaliable commands:\n\
-        < status > - shows calculations status in folders of current directory\n\
-        < clear arg1 arg2 ... > - initiates folders cleaning (removes files created by software run);\n\
-        if arguments omitted will clear all folders\n\
-        < run arg1 arg2 ... > - run calculations in folders of current directory;\n\
-        if arguments omitted will run calculations in all folders\n"
+    @args_parse("torun")
+    def run_chain(
+        self, 
+        *folders: tuple,
+        cpu_max:int | None
+    ):
+        '''
+        #* Promt command to initiate
+        #* mcu code calculations  
+        #* Parameters
+        #* ----------
+        #*
+        #* Raises
+        #* ----------
+        #*
+        #* Returns
+        #* ----------
+        #*
+        '''
+        folders = list(folders)
+        Run.call_chain(
+            folders_chain=folders,
+            display=self.display, #! dont like it
+            cpu_number=self.mpi,
+            cpu_max=cpu_max,
+        )
+        
+        return
+
+    @args_parse("inprogress")
+    def restart_chain(
+        self, 
+        *folders: tuple,
+        cpu_max:int | None
+    ):
+        '''
+        #* Promt command to initiate
+        #* mcu code calculations  
+        #* Parameters
+        #* ----------
+        #*
+        #* Raises
+        #* ----------
+        #*
+        #* Returns
+        #* ----------
+        #*
+        '''
+        folders = list(folders)
+        Run.call_chain(
+            folders_chain=folders,
+            display=self.display, #! dont like it
+            cpu_number=self.mpi,
+            cpu_max=cpu_max,
+            with_restart=True
+        )
+        
+        return
+
+    @args_parse("inprogress")
+    def restart(
+        self, 
+        *folders: tuple,
+    ):
+        dev=0
+        if dev:
+            r = Run(
+                display=self.display, #! dont like it
+                folders=[
+                    # "f1", 
+                    # "f2", 
+                    "f3", 
+                    # "f5"
+                ],
+                dev_path="/mnt/c/Users/Nikita/Desktop/codes/mcu_code_runner/src/cli/runner/test_data",
+                cpu_number=self.mpi,
+                restart=True
+            )
+            asyncio.run(r.call())
+            return
+        
+        folders = list(folders)    
+        r = Run(
+            display=self.display, #! dont like it
+            folders=folders,
+            cpu_number=self.mpi,
+            restart=True
+        )
+    
+        asyncio.run(r.call())
+        
+        
+    @args_parse("inprogress")
+    def clear(
+        self,
+        *folders:tuple
+    ):
+        print(folders)
+        cwd = os.getcwd()
+        for folder in folders:
+            clear_folder(
+                os.path.join(
+                    cwd,
+                    folder
+                )
+            )
+        
+        return
 
 
 def initiate():
-    # t = asyncio.create_task(fire.Fire(CLI))
     # print(fire.Fire(CLI))
     fire.Fire(CLI)
-    # await t
 
-# if __name__ == "__main__":
-#     print("CALLED")
-#     initiate()
+if __name__ == "__main__":
+    print("CALLED")
+    # asyncio.run(initiate())
 
 
     

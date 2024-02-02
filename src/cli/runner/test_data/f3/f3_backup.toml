@@ -1,0 +1,15 @@
+folder_path = "/mnt/c/Users/Nikita/Desktop/codes/mcu_code_runner/src/cli/runner/test_data/f3"
+file_name = "burn"
+log_file_name = "burn_log.txt"
+progress_total = 100
+auto_restarts = 0
+
+[multistep_progress.anyname.anyname_0]
+name = "HCH1"
+contents = [ "RPP  N1   -25,120  -15,85   -50,1.00", "RPP  N1   -25,120  -15,85   -50,1.10", "RPP  N1   -25,120  -15,85   -50,1.20", "RPP  N1   -25,120  -15,85   -50,1.30", "RPP  N1   -25,120  -15,85   -50,1.40",]
+queue = [ "anyname_0_3", "anyname_0_4",]
+
+[multistep_progress.anyname.anyname_1]
+name = "RCH"
+contents = [ "RCZ Nb2   60,54,54   H-50  1.50", "RCZ Nb2   60,54,54   H-50  1.70", "RCZ Nb2   60,54,54   H-50  1.90",]
+queue = [ "anyname_1_1", "anyname_1_2",]
